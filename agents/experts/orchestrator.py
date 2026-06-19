@@ -11,7 +11,7 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
-from auto_makah.agents.experts.profiles import ExpertProfile
+from agents.experts.profiles import ExpertProfile
 
 
 # ── Data structures ────────────────────────────────────────────────────

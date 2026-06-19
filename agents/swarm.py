@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
-from auto_makah.agents.experts.orchestrator import (
+from agents.experts.orchestrator import (
     DeliberationResult,
     Expert,
     ExpertOrchestrator,
