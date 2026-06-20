@@ -180,6 +180,58 @@ async def telegram_webhook(req: Request):
             await send_telegram_message(chat_id, "\n".join(lines))
             return JSONResponse({"status": "create"})
 
+        # Handle /slides — generate presentation
+        if text.startswith("/slides "):
+            from core.kimi_tools import SlidesGenerator
+            parts = text[8:].strip().split("\n", 1)
+            title = parts[0].strip() if parts else "عرض تقديمي"
+            content = parts[1].strip() if len(parts) > 1 else title
+            sd = SlidesGenerator.generate(title, content, "makkah")
+            # Save to temp HTML
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+                f.write(sd.html)
+                html_path = f.name
+            await send_telegram_message(chat_id,
+                f"🎨 تم إنشاء العرض: **{sd.title}**\n"
+                f"عدد الشرائح: {len(sd.slides)}\n"
+                f"الملف جاهز.")
+            return JSONResponse({"status": "slides", "slides": len(sd.slides)})
+
+        # Handle /rethink — organize ideas
+        if text.startswith("/rethink "):
+            from core.kimi_tools import RethinkEngine
+            args = text[9:].strip().split(" ", 1)
+            method = args[0] if args and args[0] in ["mindmap","outline","categories","swot","pros-cons"] else "mindmap"
+            notes = args[1] if len(args) > 1 else args[0] if args else ""
+            result = RethinkEngine.organize(notes, method)
+            import json
+            await send_telegram_message(chat_id,
+                f"🧠 **Rethink — {method}**\n\n"
+                f"```json\n{json.dumps(result, ensure_ascii=False, indent=2)[:3500]}\n```")
+            return JSONResponse({"status": "rethink"})
+
+        # Handle /run — execute code
+        if text.startswith("/run "):
+            from core.kimi_tools import CodeRunner
+            code = text[5:].strip()
+            lang = "python"
+            if code.startswith("js "):
+                lang = "javascript"
+                code = code[3:]
+            await send_telegram_message(chat_id, f"💻 جاري تنفيذ الكود ({lang})...")
+            if lang == "javascript":
+                result = await CodeRunner.run_javascript(code)
+            else:
+                result = await CodeRunner.run_python(code)
+            if result["success"]:
+                out = result["output"][:3000] or "(no output)"
+                await send_telegram_message(chat_id, f"✅ تم التنفيذ بنجاح:\n```\n{out}\n```")
+            else:
+                err = result["error"][:2000] or "Unknown error"
+                await send_telegram_message(chat_id, f"❌ خطأ:\n```\n{err}\n```")
+            return JSONResponse({"status": "run"})
+
         # Handle /kimi — direct Kimi API coding
         if text.startswith("/kimi "):
             from core.connectors import KimiAPIConnector
@@ -235,6 +287,9 @@ async def telegram_webhook(req: Request):
   /agents — عرض الوكلاء النشطين
   /create — إنشاء وكيل جديد
   /kimi — برمجة بقوة Kimi K2.7 Code
+  /slides — تحويل النص إلى شرائح
+  /rethink — تنظيم الأفكار
+  /run — تشغيل كود Python/JS
 
 ═ فقط اكتب استشارتك —
   أو اختر تخصصاً أعلاه."""
