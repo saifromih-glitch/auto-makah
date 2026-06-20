@@ -1,1 +1,1 @@
-# Auto Makah
+# auto_makah.core
