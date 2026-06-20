@@ -865,49 +865,6 @@ async function sendMessage() {
   }
 }
 
-async function simulateResponse(text) {
-  // Simulate response delay
-  await new Promise(r => setTimeout(r, 800 + Math.random() * 1200));
-
-  const lower = text.toLowerCase();
-
-  if (text.startsWith('/kimi')) {
-    return `💻 **Kimi K2.7 Code** — أقوى نموذج برمجة\n\n\`\`\`python\nimport json\nfrom typing import Any\n\ndef analyze_json(data: dict) -> dict:\n    """Analyze JSON data structure."""\n    return {\n        "keys": list(data.keys()),\n        "types": {k: type(v).__name__ for k, v in data.items()},\n        "depth": _max_depth(data),\n    }\n\ndef _max_depth(obj: Any, current: int = 0) -> int:\n    if isinstance(obj, dict) and obj:\n        return max(_max_depth(v, current + 1) for v in obj.values())\n    if isinstance(obj, list) and obj:\n        return max(_max_depth(v, current + 1) for v in obj)\n    return current\n\n# Usage:\n# result = analyze_json({"name": "Auto Makah", "version": 1.0})\n\`\`\`\n\n⚡ تحليل: Kimi K2.7 Code\n🎯 مستوى الثقة: 95%`;
-  }
-
-  if (text.startsWith('/agents')) {
-    return '═ **الوكلاء النشطون:**\n\n' + AGENTS.map(a => `  ${a.icon} **${a.display}** — ${a.role}`).join('\n') + '\n\n═ استخدم /create لإنشاء وكيل جديد';
-  }
-
-  if (text.startsWith('/slides')) {
-    return '🎨 **تم إنشاء العرض**\n\nعدد الشرائح: ٣\nالقالب: Makkah Dark\nالملف جاهز للتحميل من API.';
-  }
-
-  if (text.startsWith('/rethink')) {
-    return '🧠 **Rethink — SWOT Analysis**\n\n```\n✅ نقاط القوة:\n  • منصة عربية فريدة\n  • ٨ خبراء متخصصين\n\n⚠️ نقاط الضعف:\n  • جديد في السوق\n  • يحتاج تسويق\n\n🌟 الفرص:\n  • ٤٠٠ مليون ناطق بالعربية\n  • سوق AI ينمو ٣٧٪ سنوياً\n\n🚨 التهديدات:\n  • منافسة عالمية\n  • تقلب أسعار API\n```\n\n⚡ تحليل: خبير استراتيجي';
-  }
-
-  if (lower.includes('زكاة') || lower.includes('مالي') || lower.includes('حلل')) {
-    return '💰 **التحليل المالي:**\n\nبناءً على المعلومات المتاحة، الزكاة تحسب كالتالي:\n\n• **الوعاء الزكوي**: إجمالي المال النامي\n• **النسبة**: ٢.٥٪ (ربع العشر)\n• **الحول**: مرور سنة قمرية كاملة\n\n⚠️ للتحديد الدقيق، أحتاج معرفة:\n1. إجمالي الأصول النقدية\n2. قيمة الذهب والفضة\n3. الديون المستحقة لك\n4. البضائع التجارية\n\n⚡ تحليل: المحلل المالي\n🎯 مستوى الثقة: 80%';
-  }
-
-  if (lower.includes('كود') || lower.includes('python') || lower.includes('برمج')) {
-    return '💻 أقترح استخدام /kimi للحصول على أفضل كود.\n\nأو استخدم /run لتشغيل الكود مباشرة في بيئة آمنة.\n\n⚡ تحليل: خبير برمجة';
-  }
-
-  if (lower.includes('سوت') || lower.includes('swot')) {
-    return '🧠 استخدم /rethink swot لتحليل SWOT مفصل.';
-  }
-
-  const genericResponses = [
-    '🕋 أهلاً بك في Auto Makah — المنصة العربية الهجينة.\n\nكيف أقدر أخدمك اليوم؟\n\n• للتحليل المالي: اكتب "حلل وضعي المالي"\n• للبرمجة: استخدم /kimi\n• لتنظيم الأفكار: استخدم /rethink',
-    '🌸 حاضر — أنا مزيج من OpenClaw × Kimi.\n\nعندي ٨ خبراء + ٣ أدوات Kimi + Kimi K2.7 Code.\n\nوش تبي أسوي لك؟',
-    '⚡ جاهز — كل الخبراء والإمكانيات بين يديك.\n\nاكتب استشارتك أو استخدم الأدوات الجانبية.',
-  ];
-
-  return genericResponses[Math.floor(Math.random() * genericResponses.length)];
-}
-
 function sendQuick(text) {
   document.getElementById('user-input').value = text;
   sendMessage();
