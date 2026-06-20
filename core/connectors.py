@@ -264,20 +264,30 @@ class HybridRouter:
         "مستند", "docx", "pptx", "بوربوينت", "رسم", "chart",
     ]
 
+    ROUTE_CODE_KEYWORDS = [
+        "كود", "code", "python", "برنامج", "script", "html", "css",
+        "js", "javascript", "api", "json", "sql", "دالة", "function",
+        "class", "import", "npm", "pip", "git", "docker", "build",
+    ]
+
     def __init__(self):
         self.zenmux = ZenMuxConnector()
+        self.kimi = ZenMuxConnector(model="moonshotai/kimi-k2.7-code")
         self.glm4 = GLM4Connector()
         self.gpt4o = GPT4oMiniConnector()
         self.nemotron = NemotronConnector()
 
         # Model selection rules
         self.text_chain = FallbackChain().add(self.zenmux).add(self.nemotron)
+        self.code_chain = FallbackChain().add(self.kimi).add(self.zenmux)
         self.file_chain = FallbackChain().add(self.gpt4o).add(self.nemotron).add(self.zenmux)
         self.accounting_chain = FallbackChain().add(self.gpt4o).add(self.nemotron)
 
     def detect_route(self, message: str) -> str:
-        """Detect routing: text / file / accounting."""
+        """Detect routing: text / file / accounting / code."""
         msg_lower = message.lower()
+        if any(kw in msg_lower for kw in self.ROUTE_CODE_KEYWORDS):
+            return "code"
         if any(kw in msg_lower for kw in self.ROUTE_FILE_KEYWORDS):
             return "file"
         if any(kw in msg_lower for kw in self.ROUTE_ACCOUNTING_KEYWORDS):
@@ -286,6 +296,8 @@ class HybridRouter:
 
     async def call(self, prompt: str, system_prompt: str = "", max_tokens: int = 2000) -> ModelResponse:
         route = self.detect_route(prompt)
+        if route == "code":
+            return await self.code_chain.call(prompt, system_prompt, max_tokens)
         if route == "file":
             return await self.file_chain.call(prompt, system_prompt, max_tokens)
         elif route == "accounting":
