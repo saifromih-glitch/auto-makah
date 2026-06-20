@@ -143,8 +143,64 @@ async def telegram_webhook(req: Request):
         if not text:
             return JSONResponse({"status": "no_text"})
 
-        if text == "/start":
-            welcome = f"🕋 أهلاً {first_name}!\n\nأنا وكيل Auto Makah.\nاسألني عن استشارة أعمال — مالية — قانونية — تسويقية."
+        # Handle /agents
+        if text == "/agents":
+            agents_list = runtime.list_agents()
+            if not agents_list:
+                await send_telegram_message(chat_id, "لا يوجد وكلاء نشطين حالياً.\nاستخدم /create لإنشاء وكيل جديد.")
+            else:
+                lines = ["═ الوكلاء النشطون:", ""]
+                for a in agents_list:
+                    profile = a.get("profile", {})
+                    lines.append(f"  🤖 {a['name']}")
+                    if profile.get("display_name"):
+                        lines.append(f"     {profile['display_name']}")
+                    lines.append(f"     المجال: {profile.get('domain', 'عام')}")
+                    lines.append("")
+                await send_telegram_message(chat_id, "\n".join(lines))
+            return JSONResponse({"status": "agents"})
+
+        # Handle /create
+        if text == "/create":
+            from factory.builder import factory
+            templates = factory.list_templates()
+            lines = ["═ قوالب الوكلاء المتاحة:", ""]
+            for t in templates:
+                lines.append(f"  /new_{t['name']} — {t['display_name']}")
+                lines.append(f"     {t['description']}")
+                lines.append("")
+            lines.append("اكتب /new_legal_expert للتجربة")
+            await send_telegram_message(chat_id, "\n".join(lines))
+            return JSONResponse({"status": "create"})
+
+        # Handle /new_* commands — create from template
+        if text.startswith("/new_"):
+            from factory.builder import factory
+            template_name = text[5:]  # remove /new_
+            agent = factory.build_from_template(template_name)
+            if agent:
+                await send_telegram_message(chat_id, f"✅ تم إنشاء الوكيل: {template_name}\nالمجال: {agent.profile.get('domain')}\nجاهز للاستشارات.")
+            else:
+                available = [t['name'] for t in factory.list_templates()]
+                await send_telegram_message(chat_id, f"❌ القالب '{template_name}' غير موجود.\nالمتاح: {', '.join(available)}")
+            return JSONResponse({"status": "create_agent"})
+            from factory.builder import factory
+            templates = factory.list_templates()
+            tlines = "\n".join(f"  • {t['display_name']} — {t['description']}" for t in templates)
+            welcome = f"""🕋 Auto Makah — منصة تشغيل وكلاء AI سعودية.
+
+أول منصة عربية توأم لـ OpenClaw.
+
+═ قدراتي:
+
+{ tlines }
+
+═ أوامر سريعة:
+  /agents — عرض الوكلاء النشطين
+  /create — إنشاء وكيل جديد
+
+═ فقط اكتب استشارتك —
+  أو اختر تخصصاً أعلاه."""
             await send_telegram_message(chat_id, welcome)
             return JSONResponse({"status": "start"})
 

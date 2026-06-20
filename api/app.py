@@ -54,10 +54,11 @@ async def list_agents():
 
 
 # Import route modules
-from api.routes import agents, tools, channels, tenants
+from api.routes import agents, tools, channels, tenants, factory_routes
 
 # Include routers
 app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
 app.include_router(tools.router, prefix="/api/tools", tags=["tools"])
 app.include_router(channels.router, prefix="/api/channels", tags=["channels"])
 app.include_router(tenants.router, prefix="/api/tenants", tags=["tenants"])
+app.include_router(factory_routes.router, prefix="/api/factory", tags=["factory"])
