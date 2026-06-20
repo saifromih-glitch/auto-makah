@@ -197,6 +197,59 @@ class FallbackChain:
         return ModelResponse(text="", model=self.default_model_name, error="All models failed")
 
 
+class ZenMuxConnector(ModelConnector):
+    """ZenMux API — 136+ models, GLM-5.2-free, GPT-4o-mini."""
+
+    BASE_URL = "https://zenmux.ai/api/v1/chat/completions"
+
+    def __init__(self, api_key: str = None, model: str = "z-ai/glm-5.2-free"):
+        self.api_key = api_key or os.getenv("ZENMUX_API_KEY", "")
+        self.model = model
+
+    async def call(self, prompt: str, system_prompt: str = "", max_tokens: int = 2000) -> ModelResponse:
+        import time, httpx
+        start = time.time()
+
+        if not self.api_key:
+            return ModelResponse(text="", model=self.model, error="No ZenMux API key")
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                resp = await client.post(
+                    self.BASE_URL,
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": messages,
+                        "max_tokens": max_tokens,
+                        "temperature": 0.7,
+                    },
+                )
+                data = resp.json()
+
+                if "choices" in data:
+                    msg = data["choices"][0]["message"]
+                    text = msg.get("content") or msg.get("reasoning", "")
+                    return ModelResponse(
+                        text=text,
+                        model=self.model,
+                        tokens_in=data.get("usage", {}).get("prompt_tokens", 0),
+                        tokens_out=data.get("usage", {}).get("completion_tokens", 0),
+                        latency_ms=int((time.time() - start) * 1000),
+                    )
+                return ModelResponse(text="", model=self.model, error=str(data))
+        except Exception as e:
+            return ModelResponse(text="", model=self.model, error=str(e))
+
+
 class HybridRouter:
     """Route to different models based on task type."""
 
@@ -212,13 +265,14 @@ class HybridRouter:
     ]
 
     def __init__(self):
+        self.zenmux = ZenMuxConnector()
         self.glm4 = GLM4Connector()
         self.gpt4o = GPT4oMiniConnector()
         self.nemotron = NemotronConnector()
 
         # Model selection rules
-        self.text_chain = FallbackChain().add(self.glm4).add(self.nemotron)
-        self.file_chain = FallbackChain().add(self.gpt4o).add(self.nemotron).add(self.glm4)
+        self.text_chain = FallbackChain().add(self.zenmux).add(self.nemotron)
+        self.file_chain = FallbackChain().add(self.gpt4o).add(self.nemotron).add(self.zenmux)
         self.accounting_chain = FallbackChain().add(self.gpt4o).add(self.nemotron)
 
     def detect_route(self, message: str) -> str:
