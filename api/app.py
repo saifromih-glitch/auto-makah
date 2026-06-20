@@ -4,7 +4,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+import os
 
 app = FastAPI(
     title="Auto Makah",
@@ -20,6 +21,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard_root():
+    """Serve the main dashboard."""
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard", "index.html")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Auto Makah 🕋</h1>")
 
 
 @app.get("/api/health")

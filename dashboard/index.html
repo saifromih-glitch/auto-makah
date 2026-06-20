@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕋 Auto Makah — Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;overflow-x:hidden}
+.grain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.03;background:radial-gradient(circle at 50% 50%,#fff 1px,transparent 1px);background-size:3px 3px}
+.container{max-width:1100px;margin:0 auto;padding:16px;position:relative;z-index:1}
+header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid #1a1a2e}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:32px}
+.logo-text h1{font-size:20px;font-weight:700;background:linear-gradient(135deg,#b8860b,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-text span{font-size:11px;color:#666}
+.status-dot{display:flex;align-items:center;gap:6px;font-size:13px;background:#0d0d1a;padding:8px 16px;border-radius:20px;border:1px solid #1a1a2e}
+.status-dot .live{width:8px;height:8px;background:#00ff88;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.4)}50%{box-shadow:0 0 0 8px rgba(0,255,136,0)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:20px}
+.card{background:#0d0d1a;border:1px solid #1a1a2e;border-radius:12px;padding:18px;transition:all .2s}
+.card:hover{border-color:#b8860b33;transform:translateY(-1px)}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card-icon{font-size:22px}
+.card-title{font-size:14px;color:#888;font-weight:600}
+.card-value{font-size:28px;font-weight:700;color:#fff;margin:4px 0}
+.card-sub{font-size:12px;color:#555}
+.full-width{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;padding:10px 12px;border-bottom:1px solid #1a1a2e;color:#888;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid #0f0f1f;color:#ccc}
+tr:hover td{background:#0f0f1f}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:#00ff8815;color:#00ff88;border:1px solid #00ff8833}
+.badge-gold{background:#ffd70015;color:#ffd700;border:1px solid #ffd70033}
+.badge-blue{background:#4488ff15;color:#4488ff;border:1px solid #4488ff33}
+.badge-purple{background:#aa44ff15;color:#aa44ff;border:1px solid #aa44ff33}
+.section-title{font-size:16px;font-weight:700;color:#fff;margin:24px 0 14px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:#1a1a2e}
+.chart-bar{height:8px;background:#1a1a2e;border-radius:4px;overflow:hidden;margin-top:8px}
+.chart-fill{height:100%;background:linear-gradient(90deg,#b8860b,#ffd700);border-radius:4px;transition:width 1s ease}
+.model-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0f0f1f}
+.model-name{font-size:13px;color:#ddd}
+.model-type{font-size:11px;color:#666}
+.tools-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tool-pill{background:#1a1a2e;color:#888;padding:4px 12px;border-radius:14px;font-size:11px}
+footer{text-align:center;padding:30px;color:#333;font-size:11px;border-top:1px solid #0f0f1f;margin-top:30px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.card-value{font-size:22px}.logo-text h1{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="container">
+
+<header>
+<div class="logo">
+<div class="logo-icon">🕋</div>
+<div class="logo-text">
+<h1>Auto Makah</h1>
+<span>AI Agent Platform — السعودية</span>
+</div>
+</div>
+<div class="status-dot">
+<div class="live"></div>
+<span>Live — ams</span>
+</div>
+</header>
+
+<div class="grid" id="statsGrid">
+<div class="card"><div class="card-header"><span class="card-icon">🤖</span><span class="card-title">الوكلاء</span></div><div class="card-value" id="statAgents">—</div><div class="card-sub">Agent Runtime</div></div>
+<div class="card"><div class="card-header"><span class="card-icon">🛠️</span><span class="card-title">الأدوات</span></div><div class="card-value" id="statTools">—</div><div class="card-sub">Tool Registry</div></div>
+<div class="card"><div class="card-header"><span class="card-icon">🏭</span><span class="card-title">القوالب</span></div><div class="card-value" id="statTemplates">—</div><div class="card-sub">Agent Factory</div></div>
+<div class="card"><div class="card-header"><span class="card-icon">📚</span><span class="card-title">المعرفة</span></div><div class="card-value" id="statKnowledge">—</div><div class="card-sub">Knowledge Base</div></div>
+</div>
+
+<div class="section-title">🧠 نماذج الذكاء</div>
+<div class="card full-width" id="modelsCard">
+<div class="model-row"><span class="model-name">ZenMux GLM-5.2</span><span class="badge badge-gold">أساسي</span></div>
+<div class="model-row"><span class="model-name">GPT-4o-mini</span><span class="badge badge-blue">تنفيذ</span></div>
+<div class="model-row"><span class="model-name">Nemotron 120B</span><span class="badge badge-green">احتياطي</span></div>
+</div>
+
+<div class="section-title">🏭 قوالب الوكلاء</div>
+<div class="card full-width">
+<table id="templatesTable">
+<tr><th>الوكيل</th><th>المجال</th><th>الحالة</th></tr>
+<tr><td>⚖️ المستشار القانوني</td><td>legal</td><td><span class="badge badge-green">جاهز</span></td></tr>
+<tr><td>📊 المستشار المالي</td><td>accounting</td><td><span class="badge badge-green">جاهز</span></td></tr>
+<tr><td>📈 خبير التسويق</td><td>marketing</td><td><span class="badge badge-green">جاهز</span></td></tr>
+<tr><td>⚙️ المستشار الهندسي</td><td>engineering</td><td><span class="badge badge-green">جاهز</span></td></tr>
+<tr><td>👥 مستشار الموارد البشرية</td><td>hr</td><td><span class="badge badge-green">جاهز</span></td></tr>
+</table>
+</div>
+
+<div class="section-title">📚 نطاقات المعرفة</div>
+<div class="card full-width">
+<div class="tools-grid">
+<span class="tool-pill">محاسبة — IFRS/SOCPA</span>
+<span class="tool-pill">قانون سعودي</span>
+<span class="tool-pill">تسويق — GSTIC/AARRR</span>
+<span class="tool-pill">هندسة — ورش/هيدروليك</span>
+<span class="tool-pill">زكاة وضرائب</span>
+<span class="tool-pill">نظام العمل</span>
+<span class="tool-pill">تحليل مالي</span>
+<span class="tool-pill">تأمينات — GOSI</span>
+</div>
+</div>
+
+<div class="section-title">🛠️ فئات الأدوات</div>
+<div class="card full-width">
+<div class="tools-grid">
+<span class="tool-pill">core</span>
+<span class="tool-pill">file</span>
+<span class="tool-pill">search</span>
+<span class="tool-pill">coding</span>
+<span class="tool-pill">deploy</span>
+<span class="tool-pill">communication</span>
+<span class="tool-pill">knowledge</span>
+<span class="tool-pill">utility</span>
+</div>
+</div>
+
+<footer>
+🕋 Auto Makah v0.1.0 — Fly.io — ams — 🇸🇦
+</footer>
+
+</div>
+
+<script>
+async function loadStats(){
+try{
+var r=await fetch('/api/health');
+var d=await r.json();
+document.getElementById('statAgents').textContent=d.agents||0;
+document.getElementById('statTools').textContent=d.tools||0;
+}catch(e){}
+
+try{
+var r2=await fetch('/api/factory/templates');
+var tmpl=await r2.json();
+document.getElementById('statTemplates').textContent=tmpl.length||5;
+}catch(e){}
+
+document.getElementById('statKnowledge').textContent='4';
+}
+loadStats();
+setInterval(loadStats,30000);
+</script>
+</body>
+</html>
