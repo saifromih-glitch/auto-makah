@@ -56,7 +56,7 @@ async def run_code(req: CodeRunRequest):
     return result
 
 
-@router.get("/kimi")
+@router.get("/list")
 async def list_kimi_tools():
     """List available Kimi-inspired tools."""
     from core.kimi_tools import KIMI_TOOLS
