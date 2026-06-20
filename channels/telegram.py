@@ -15,6 +15,7 @@ from core.connectors import HybridRouter
 from knowledge.search import search_engine
 from memory.store import memory
 from memory.recall import injector
+from knowledge.learner import learner
 
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -123,6 +124,15 @@ async def process_message(chat_id: int, user_id: int, text: str, first_name: str
 
     clean = _deduplicate(response.text)
     memory.remember(session_id, "agent", clean)
+
+    # Learning Loop — record interaction
+    domains = search_engine.domain_detect(text)
+    domain = domains[0] if domains else "general"
+    learner.record_interaction(user_id_str, text, clean, domain)
+    rating = learner.rate_response(text, clean)
+    if rating["quality"] == "good":
+        learner.extract_knowledge(clean, domain)
+
     return clean
 
 

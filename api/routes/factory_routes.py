@@ -69,3 +69,10 @@ async def clone_agent(req: CloneRequest):
 async def clone_status():
     """Get cloner status."""
     return JSONResponse(cloner.status())
+
+
+@router.get("/learning")
+async def learning_status():
+    """Get learning loop stats."""
+    from knowledge.learner import learner
+    return JSONResponse(learner.stats())
