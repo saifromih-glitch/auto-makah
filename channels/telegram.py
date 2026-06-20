@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 
 from core.agent import runtime
 from core.connectors import HybridRouter
+from core.responder import responder as intelligent_responder
 from knowledge.search import search_engine
 from memory.store import memory
 from memory.recall import injector
@@ -111,18 +112,14 @@ async def process_message(chat_id: int, user_id: int, text: str, first_name: str
     user_id_str = str(user_id)
 
     memory.remember(session_id, "user", text)
-    context = injector.inject(text, user_id=user_id_str, session_id=session_id)
 
-    system = SYSTEM_PROMPT
-    if context:
-        system += f"\n\n[Context]\n{context}"
+    # Use Intelligent Responder (auto-routes to experts or simple)
+    response_text = await intelligent_responder.respond(text, user_id_str, session_id)
 
-    response = await router_model.call(text, system_prompt=system)
+    if not response_text or "عذراً" in response_text[:50]:
+        return response_text or "⚠️ عذراً، النماذج مشغولة حالياً."
 
-    if not response.ok:
-        return "⚠️ عذراً، جميع النماذج مشغولة حالياً. حاول مرة أخرى بعد قليل."
-
-    clean = _deduplicate(response.text)
+    clean = _deduplicate(response_text)
     memory.remember(session_id, "agent", clean)
 
     # Learning Loop — record interaction
