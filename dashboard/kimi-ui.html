@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕋 Auto Makah — Hybrid Platform</title>
+<style>
+/* ═══════════════════════════════════════════
+   🕋 Auto Makah — Kimi-Style Hybrid Interface
+   Makkah Meets Modernity — Dark + Gold
+   ═══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --gold: #d4a017;
+  --gold-light: #f0c740;
+  --emerald: #0d4f2e;
+  --emerald-deep: #083d22;
+  --dark: #0a0f14;
+  --darker: #060a0e;
+  --card: #111820;
+  --card-hover: #161f2a;
+  --text: #e8e4db;
+  --text-dim: #8a8578;
+  --border: #1e2a35;
+  --accent: #d4a017;
+  --error: #e94560;
+  --success: #0d9488;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --font-display: 'Noto Naskh Arabic', serif;
+  --font-body: 'Noto Sans Arabic', sans-serif;
+  --sidebar-w: 280px;
+  --toolbar-h: 56px;
+}
+
+.light {
+  --dark: #f5f0e8;
+  --darker: #ede4d3;
+  --card: #ffffff;
+  --card-hover: #f8f4ed;
+  --text: #1a1814;
+  --text-dim: #6b6660;
+  --border: #d4c9b0;
+  --shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--darker);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  transition: background 0.4s, color 0.4s;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR — Agents + Tools
+   ═══════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--dark);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--emerald), var(--gold));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.nav-section {
+  margin-bottom: 16px;
+}
+
+.nav-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px 4px;
+}
+
+.agent-item, .tool-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.agent-item:hover, .tool-item:hover {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.agent-item.active {
+  background: var(--card);
+  color: var(--text);
+  border-right: 3px solid var(--gold);
+}
+
+.agent-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.agent-avatar.finance { background: rgba(212,160,23,0.15); color: var(--gold); }
+.agent-avatar.legal { background: rgba(14,165,233,0.15); color: #0ea5e9; }
+.agent-avatar.strategy { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+.agent-avatar.operations { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.agent-avatar.marketing { background: rgba(236,72,153,0.15); color: #ec4899; }
+.agent-avatar.hr { background: rgba(34,197,94,0.15); color: #22c55e; }
+.agent-avatar.code { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.agent-avatar.data { background: rgba(168,85,247,0.15); color: #a855f7; }
+
+.agent-info { flex: 1; min-width: 0; }
+.agent-name { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent-role { font-size: 11px; color: var(--text-dim); }
+
+.tool-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+  background: rgba(212,160,23,0.1);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN — Chat Area
+   ═══════════════════════════════════════════ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Top Bar */
+.topbar {
+  height: var(--toolbar-h);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  background: var(--dark);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.model-badge {
+  background: var(--card);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.model-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.topbar-actions {
+  margin-right: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-btn, .icon-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.theme-btn:hover, .icon-btn:hover {
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+/* Messages */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+.message {
+  display: flex;
+  gap: 12px;
+  max-width: 80%;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message.agent {
+  align-self: flex-start;
+}
+
+.message-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.message.user .message-avatar {
+  background: linear-gradient(135deg, var(--emerald), var(--gold));
+}
+
+.message.agent .message-avatar {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.message-bubble {
+  background: var(--card);
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.message.user .message-bubble {
+  background: linear-gradient(135deg, var(--emerald), #0d6b3e);
+  border-color: var(--emerald);
+  color: #fff;
+}
+
+.message-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Welcome Message */
+.welcome-card {
+  background: linear-gradient(135deg, var(--card), var(--card-hover));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  max-width: 500px;
+  align-self: center;
+  margin: auto;
+}
+
+.welcome-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.welcome-actions {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+
+.welcome-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-body);
+}
+
+.welcome-btn:hover {
+  border-color: var(--gold);
+  color: var(--text);
+  background: var(--card-hover);
+}
+
+/* ═══════════════════════════════════════════
+   INPUT — Bottom Bar
+   ═══════════════════════════════════════════ */
+.input-area {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--dark);
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 8px 16px;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,160,23,0.1);
+}
+
+.input-wrapper textarea {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  padding: 6px 0;
+  min-height: 24px;
+  max-height: 120px;
+  line-height: 1.5;
+}
+
+.input-wrapper textarea::placeholder {
+  color: var(--text-dim);
+}
+
+.send-btn {
+  background: linear-gradient(135deg, var(--emerald), var(--gold));
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(212,160,23,0.3);
+}
+
+.send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════
+   TYPING INDICATOR
+   ═══════════════════════════════════════════ */
+.typing-dots {
+  display: flex; gap: 4px; padding: 8px 0;
+}
+
+.typing-dots span {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  animation: bounce 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* ═══════════════════════════════════════════
+   TOOL PALETTE — Quick Access
+   ═══════════════════════════════════════════ */
+.tool-palette {
+  display: flex;
+  gap: 6px;
+  padding: 0 24px 8px;
+  flex-wrap: wrap;
+}
+
+.tool-chip {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-body);
+}
+
+.tool-chip:hover {
+  border-color: var(--gold);
+  color: var(--text);
+  background: var(--card-hover);
+}
+
+/* ═══════════════════════════════════════════
+   MARBLE BACKGROUND — Atmospheric
+   ═══════════════════════════════════════════ */
+.main {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(212,160,23,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(13,79,46,0.08) 0%, transparent 50%),
+    var(--darker);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — Mobile
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    transform: translateX(100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .message {
+    max-width: 90%;
+  }
+
+  .message-bubble {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .tool-palette {
+    padding: 0 12px 8px;
+  }
+
+  .input-area {
+    padding: 12px 12px 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Expert attribution badge */
+.expert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(212,160,23,0.1);
+  border: 1px solid rgba(212,160,23,0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--gold);
+  margin: 4px 2px;
+}
+
+/* Code block in messages */
+.message-bubble pre {
+  background: var(--darker);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  direction: ltr;
+  text-align: left;
+}
+
+.message-bubble code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+     ═══════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🕋</div>
+    <div>
+      <div class="sidebar-title">Auto Makah</div>
+      <div style="font-size:10px;color:var(--text-dim)">OpenClaw × Kimi Hybrid</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">🤖 الخبراء — ٨ وكلاء</div>
+      <div id="agents-list"></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">🛠️ أدوات Kimi</div>
+      <div class="tool-item" onclick="activateTool('slides')">
+        <div class="tool-icon">🎨</div>
+        <div>Slides Generator</div>
+      </div>
+      <div class="tool-item" onclick="activateTool('rethink')">
+        <div class="tool-icon">🧠</div>
+        <div>Rethink</div>
+      </div>
+      <div class="tool-item" onclick="activateTool('code_run')">
+        <div class="tool-icon">💻</div>
+        <div>Code Runner</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">📊 الحالة</div>
+      <div id="status-panel" style="padding:8px 12px;font-size:12px;color:var(--text-dim)"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CHAT
+     ═══════════════════════════════════════════ -->
+<main class="main">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" title="Menu">
+      ☰
+    </button>
+    <div class="model-badge">
+      <span class="dot"></span>
+      <span id="current-model">GLM-5.2 + Kimi K2.7</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="refreshStatus()" title="Refresh">🔄</button>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Theme">🌙</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages-container" id="messages">
+    <div class="welcome-card">
+      <div class="welcome-icon">🕋</div>
+      <div class="welcome-title">مرحباً بك في Auto Makah</div>
+      <div class="welcome-subtitle">
+        أول منصة عربية هجينة — تجمع قوة OpenClaw في تشغيل الوكلاء مع قوة Kimi في البرمجة والأدوات
+      </div>
+      <div class="welcome-actions">
+        <button class="welcome-btn" onclick="sendQuick('حلل وضعي المالي واحسب زكاتي')">
+          💰 تحليل مالي
+        </button>
+        <button class="welcome-btn" onclick="sendQuick('اكتب كود Python لتحليل البيانات')">
+          💻 برمجة
+        </button>
+        <button class="welcome-btn" onclick="sendQuick('اعمل لي SWOT لمشروعي')">
+          🧠 Rethink
+        </button>
+        <button class="welcome-btn" onclick="sendQuick('/agents')">
+          🤖 عرض الوكلاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tool Palette -->
+  <div class="tool-palette">
+    <button class="tool-chip" onclick="activateTool('slides')">🎨 شرائح</button>
+    <button class="tool-chip" onclick="activateTool('rethink')">🧠 تنظيم أفكار</button>
+    <button class="tool-chip" onclick="activateTool('code_run')">💻 تشغيل كود</button>
+    <button class="tool-chip" onclick="sendQuick('/kimi اكتب كود بايثون يحلل بيانات JSON')">⚡ Kimi Code</button>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea id="user-input" placeholder="اكتب استشارتك... أو استخدم /kimi للبرمجة" rows="1" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" onclick="sendMessage()" id="send-btn" title="Send">↑</button>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════════ -->
+<script>
+// ═══ State ═══
+const AGENTS = [
+  {name:'financial', display:'محلل مالي', role:'تحليل مالي — زكاة — ميزانية', icon:'💰', cls:'finance'},
+  {name:'legal', display:'مستشار قانوني', role:'قانون سعودي — عقود — أنظمة', icon:'⚖️', cls:'legal'},
+  {name:'strategist', display:'مخطط استراتيجي', role:'استراتيجيات — خطط — رؤية', icon:'🧭', cls:'strategy'},
+  {name:'operations', display:'خبير تشغيلي', role:'تحسين عمليات — TOC', icon:'⚙️', cls:'operations'},
+  {name:'marketing', display:'خبير تسويق', role:'تسويق — نمو — AARRR', icon:'📈', cls:'marketing'},
+  {name:'hr', display:'خبير موارد بشرية', role:'موظفين — تدريب — توظيف', icon:'👥', cls:'hr'},
+  {name:'codemaster', display:'خبير برمجة', role:'كود — Microservices — CI/CD', icon:'💻', cls:'code'},
+  {name:'data', display:'محلل بيانات', role:'بيانات — إحصاء — تنبؤات', icon:'📊', cls:'data'},
+];
+
+let currentTheme = 'dark';
+let activeAgent = null;
+let activeTool = null;
+
+// ═══ Init ═══
+document.addEventListener('DOMContentLoaded', () => {
+  renderAgents();
+  fetchHealth();
+  autoResizeTextarea();
+});
+
+// ═══ Agents List ═══
+function renderAgents() {
+  const container = document.getElementById('agents-list');
+  container.innerHTML = AGENTS.map(a => `
+    <div class="agent-item" onclick="toggleAgent('${a.name}')" data-agent="${a.name}">
+      <div class="agent-avatar ${a.cls}">${a.icon}</div>
+      <div class="agent-info">
+        <div class="agent-name">${a.display}</div>
+        <div class="agent-role">${a.role}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleAgent(name) {
+  document.querySelectorAll('.agent-item').forEach(el => el.classList.remove('active'));
+  const el = document.querySelector(`[data-agent="${name}"]`);
+  if (el) {
+    el.classList.add('active');
+    activeAgent = activeAgent === name ? null : name;
+  }
+  if (activeAgent) {
+    setInputPlaceholder(`استشر ${AGENTS.find(a=>a.name===activeAgent)?.display}...`);
+  } else {
+    setInputPlaceholder('اكتب استشارتك...');
+  }
+}
+
+// ═══ Tools ═══
+function activateTool(tool) {
+  activeTool = tool;
+  const toolPrompts = {
+    slides: '🎨 Slides: اكتب عنوان ومحتوى العرض',
+    rethink: '🧠 Rethink: ما الأفكار اللي تبي تنظمها؟',
+    code_run: '💻 Code Runner: اكتب الكود اللي تبي تشغله',
+  };
+  setInputPlaceholder(toolPrompts[tool] || 'اكتب استشارتك...');
+}
+
+// ═══ Messages ═══
+function addMessage(content, role, meta = '') {
+  const container = document.getElementById('messages');
+  // Remove welcome card if present
+  const welcome = container.querySelector('.welcome-card');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+
+  const avatar = role === 'user' ? '🕋' : '🌸';
+  const avatarLabel = role === 'user' ? 'أنت' : 'Auto Makah';
+
+  div.innerHTML = `
+    <div class="message-avatar" title="${avatarLabel}">${avatar}</div>
+    <div>
+      <div class="message-bubble">${formatMessage(content)}</div>
+      ${meta ? `<div class="message-meta">${meta}</div>` : ''}
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTyping() {
+  const container = document.getElementById('messages');
+  const welcome = container.querySelector('.welcome-card');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = 'message agent';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="message-avatar">🌸</div>
+    <div>
+      <div class="message-bubble">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function formatMessage(text) {
+  // Escape HTML
+  let html = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Code blocks
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Expert badge
+  html = html.replace(/⚡ تحليل: (.*?)$/gm, '<div class="expert-badge">⚡ $1</div>');
+  // Newlines
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
+// ═══ Send Message ═══
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, 'user');
+  input.value = '';
+  autoResizeTextarea();
+  addTyping();
+
+  try {
+    // Call local API if available, otherwise use fetch
+    const baseUrl = window.location.origin;
+    const resp = await fetch(`${baseUrl}/api/chat/chat`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: text,
+        session_id: 'web_' + (activeAgent || 'general'),
+        agent: activeAgent || null,
+        tool: activeTool || null,
+      }),
+    });
+
+    removeTyping();
+
+    if (resp.ok) {
+      const data = await resp.json();
+      addMessage(data.reply || 'تم استلام طلبك', 'agent',
+        data.model ? `⚡ ${data.model} · ${data.latency_ms || 0}ms` : '');
+    } else {
+      // Fallback: simulated response
+      const simResp = await simulateResponse(text);
+      removeTyping();
+      addMessage(simResp, 'agent', '⚡ GLM-5.2 · محاكاة');
+    }
+  } catch(e) {
+    removeTyping();
+    // Simulated response for demo
+    const simResp = await simulateResponse(text);
+    addMessage(simResp, 'agent', '⚡ GLM-5.2 · محاكاة');
+  }
+}
+
+async function simulateResponse(text) {
+  // Simulate response delay
+  await new Promise(r => setTimeout(r, 800 + Math.random() * 1200));
+
+  const lower = text.toLowerCase();
+
+  if (text.startsWith('/kimi')) {
+    return `💻 **Kimi K2.7 Code** — أقوى نموذج برمجة\n\n\`\`\`python\nimport json\nfrom typing import Any\n\ndef analyze_json(data: dict) -> dict:\n    """Analyze JSON data structure."""\n    return {\n        "keys": list(data.keys()),\n        "types": {k: type(v).__name__ for k, v in data.items()},\n        "depth": _max_depth(data),\n    }\n\ndef _max_depth(obj: Any, current: int = 0) -> int:\n    if isinstance(obj, dict) and obj:\n        return max(_max_depth(v, current + 1) for v in obj.values())\n    if isinstance(obj, list) and obj:\n        return max(_max_depth(v, current + 1) for v in obj)\n    return current\n\n# Usage:\n# result = analyze_json({"name": "Auto Makah", "version": 1.0})\n\`\`\`\n\n⚡ تحليل: Kimi K2.7 Code\n🎯 مستوى الثقة: 95%`;
+  }
+
+  if (text.startsWith('/agents')) {
+    return '═ **الوكلاء النشطون:**\n\n' + AGENTS.map(a => `  ${a.icon} **${a.display}** — ${a.role}`).join('\n') + '\n\n═ استخدم /create لإنشاء وكيل جديد';
+  }
+
+  if (text.startsWith('/slides')) {
+    return '🎨 **تم إنشاء العرض**\n\nعدد الشرائح: ٣\nالقالب: Makkah Dark\nالملف جاهز للتحميل من API.';
+  }
+
+  if (text.startsWith('/rethink')) {
+    return '🧠 **Rethink — SWOT Analysis**\n\n```\n✅ نقاط القوة:\n  • منصة عربية فريدة\n  • ٨ خبراء متخصصين\n\n⚠️ نقاط الضعف:\n  • جديد في السوق\n  • يحتاج تسويق\n\n🌟 الفرص:\n  • ٤٠٠ مليون ناطق بالعربية\n  • سوق AI ينمو ٣٧٪ سنوياً\n\n🚨 التهديدات:\n  • منافسة عالمية\n  • تقلب أسعار API\n```\n\n⚡ تحليل: خبير استراتيجي';
+  }
+
+  if (lower.includes('زكاة') || lower.includes('مالي') || lower.includes('حلل')) {
+    return '💰 **التحليل المالي:**\n\nبناءً على المعلومات المتاحة، الزكاة تحسب كالتالي:\n\n• **الوعاء الزكوي**: إجمالي المال النامي\n• **النسبة**: ٢.٥٪ (ربع العشر)\n• **الحول**: مرور سنة قمرية كاملة\n\n⚠️ للتحديد الدقيق، أحتاج معرفة:\n1. إجمالي الأصول النقدية\n2. قيمة الذهب والفضة\n3. الديون المستحقة لك\n4. البضائع التجارية\n\n⚡ تحليل: المحلل المالي\n🎯 مستوى الثقة: 80%';
+  }
+
+  if (lower.includes('كود') || lower.includes('python') || lower.includes('برمج')) {
+    return '💻 أقترح استخدام /kimi للحصول على أفضل كود.\n\nأو استخدم /run لتشغيل الكود مباشرة في بيئة آمنة.\n\n⚡ تحليل: خبير برمجة';
+  }
+
+  if (lower.includes('سوت') || lower.includes('swot')) {
+    return '🧠 استخدم /rethink swot لتحليل SWOT مفصل.';
+  }
+
+  const genericResponses = [
+    '🕋 أهلاً بك في Auto Makah — المنصة العربية الهجينة.\n\nكيف أقدر أخدمك اليوم؟\n\n• للتحليل المالي: اكتب "حلل وضعي المالي"\n• للبرمجة: استخدم /kimi\n• لتنظيم الأفكار: استخدم /rethink',
+    '🌸 حاضر — أنا مزيج من OpenClaw × Kimi.\n\nعندي ٨ خبراء + ٣ أدوات Kimi + Kimi K2.7 Code.\n\nوش تبي أسوي لك؟',
+    '⚡ جاهز — كل الخبراء والإمكانيات بين يديك.\n\nاكتب استشارتك أو استخدم الأدوات الجانبية.',
+  ];
+
+  return genericResponses[Math.floor(Math.random() * genericResponses.length)];
+}
+
+function sendQuick(text) {
+  document.getElementById('user-input').value = text;
+  sendMessage();
+}
+
+// ═══ Keyboard ═══
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ═══ Textarea Auto-resize ═══
+function autoResizeTextarea() {
+  const ta = document.getElementById('user-input');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+}
+
+function setInputPlaceholder(text) {
+  document.getElementById('user-input').placeholder = text;
+}
+
+// ═══ Theme Toggle ═══
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.body.className = currentTheme;
+  document.getElementById('theme-btn').textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('auto-makah-theme', currentTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('auto-makah-theme');
+if (savedTheme) {
+  currentTheme = savedTheme;
+  document.body.className = currentTheme;
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+}
+
+// ═══ Sidebar Toggle ═══
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ═══ Health Check ═══
+async function fetchHealth() {
+  try {
+    const resp = await fetch('/api/health');
+    if (resp.ok) {
+      const data = await resp.json();
+      document.getElementById('status-panel').innerHTML = `
+        ✅ متصل<br>
+        🤖 ${data.agents || 8} وكلاء<br>
+        🛠️ ${data.tools || 26} أداة<br>
+        📦 v${data.version || '0.1.0'}
+      `;
+      document.getElementById('current-model').textContent = 'GLM-5.2 + Kimi K2.7';
+    }
+  } catch(e) {
+    document.getElementById('status-panel').innerHTML = '🟡 محاكاة (API غير متصل)';
+  }
+}
+
+function refreshStatus() {
+  fetchHealth();
+}
+
+// ═══ Auto-refresh status every 60s ═══
+setInterval(fetchHealth, 60000);
+</script>
+
+</body>
+</html>

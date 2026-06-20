@@ -27,6 +27,16 @@ from api.middleware import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
 
 
+@app.get("/kimi", response_class=HTMLResponse)
+async def kimi_ui():
+    """Serve the Kimi-style hybrid interface."""
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard", "kimi-ui.html")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Kimi UI not found</h1>")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def dashboard_root():
     """Serve the main dashboard."""
@@ -70,7 +80,7 @@ async def list_agents():
 
 
 # Import route modules
-from api.routes import agents, tools, channels, tenants, factory_routes, executor_routes, skills_routes
+from api.routes import agents, tools, channels, tenants, factory_routes, executor_routes, skills_routes, chat
 from api import kimi_tools
 
 # Include routers
@@ -82,3 +92,4 @@ app.include_router(factory_routes.router, prefix="/api/factory", tags=["factory"
 app.include_router(executor_routes.router, prefix="/api/execute", tags=["execute"])
 app.include_router(skills_routes.router, prefix="/api/skills", tags=["skills"])
 app.include_router(kimi_tools.router, tags=["kimi-tools"])
+app.include_router(chat.router, tags=["chat"])
