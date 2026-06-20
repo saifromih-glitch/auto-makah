@@ -81,7 +81,7 @@ async def list_agents():
 
 # Import route modules
 from api.routes import agents, tools, channels, tenants, factory_routes, executor_routes, skills_routes, chat
-from api import kimi_tools
+from api import kimi_tools, developer
 
 # Include routers
 app.include_router(agents.router, prefix="/api/agents", tags=["agents"])
@@ -93,3 +93,4 @@ app.include_router(executor_routes.router, prefix="/api/execute", tags=["execute
 app.include_router(skills_routes.router, prefix="/api/skills", tags=["skills"])
 app.include_router(kimi_tools.router, tags=["kimi-tools"])
 app.include_router(chat.router, tags=["chat"])
+app.include_router(developer.router, tags=["developer-platform"])
