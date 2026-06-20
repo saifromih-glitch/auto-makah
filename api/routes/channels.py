@@ -3,7 +3,12 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from channels.telegram import router as telegram_router
+
 router = APIRouter()
+
+# Mount Telegram webhook routes
+router.include_router(telegram_router, prefix="/telegram", tags=["telegram"])
 
 
 class ChannelConfig(BaseModel):
