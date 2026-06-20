@@ -48,39 +48,38 @@ class BrowserAutomation:
             return {"url": url, "error": str(e), "success": False}
 
     @staticmethod
-    async def search_web(query: str, engine: str = "google") -> dict:
+    async def search_web(query: str, engine: str = "duckduckgo") -> dict:
         """Search the web using DuckDuckGo (no API key needed)."""
         try:
             import httpx
             from urllib.parse import quote
 
             engines = {
-                "google": f"https://www.google.com/search?q={quote(query)}",
-                "bing": f"https://www.bing.com/search?q={quote(query)}",
-                "duckduckgo": f"https://duckduckgo.com/html/?q={quote(query)}",
+                "google": f"https://www.google.com/search?q={quote(query)}&hl=en",
+                "duckduckgo": f"https://lite.duckduckgo.com/lite/?q={quote(query)}",
             }
             url = engines.get(engine, engines["duckduckgo"])
 
-            async with httpx.AsyncClient(timeout=15) as client:
+            async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
                 resp = await client.get(url, headers={
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 })
-                # Extract snippets (basic)
                 text = resp.text
-                results = []
+                # Extract result links
                 import re
-                # Simple result extraction
-                snippets = re.findall(r'<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', text, re.DOTALL)
-                for href, title in snippets[:10]:
-                    results.append({"title": title.strip(), "url": href})
+                results = []
+                # DuckDuckGo Lite format
+                links = re.findall(r'<a[^>]*href="(https?://[^"]*)"[^>]*>(.*?)</a>', text, re.IGNORECASE)
+                for href, title in links[:10]:
+                    if 'duckduckgo.com' not in href:
+                        results.append({"title": title.strip(), "url": href})
 
                 return {
                     "query": query,
                     "engine": engine,
                     "status": resp.status_code,
-                    "results": results[:10] if results else [],
+                    "results": results[:10],
                     "count": len(results),
-                    "raw_length": len(text),
                 }
         except Exception as e:
             return {"query": query, "error": str(e), "success": False}
