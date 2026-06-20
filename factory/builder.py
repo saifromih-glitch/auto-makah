@@ -10,6 +10,20 @@ from core.agent import runtime, Agent
 from core.tools import registry
 
 
+# Auto-seed knowledge on first import
+def _auto_seed():
+    try:
+        from knowledge.trainer import seed_knowledge_base
+        stats = seed_knowledge_base()
+        if stats["total_entries"] == 0:
+            # First time — seed
+            pass
+    except:
+        pass
+
+_auto_seed()
+
+
 # ═══════════════════════════════════
 # Agent Templates
 # ═══════════════════════════════════
@@ -185,6 +199,16 @@ class AgentFactory:
             },
         )
         agent.set_system_prompt(template["system_prompt"])
+
+        # Inject trained knowledge
+        try:
+            from knowledge.trainer import train_expert_prompt
+            domain = template.get("domain", "")
+            if domain:
+                trained = train_expert_prompt(domain)
+                agent.set_system_prompt(trained)
+        except:
+            pass
 
         # Load domain knowledge
         from knowledge.base import knowledge_base
