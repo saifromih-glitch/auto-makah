@@ -2,7 +2,6 @@ app = "auto-makah"
 primary_region = "ams"
 
 [build]
-  buildpacks = ["heroku/python"]
 
 [env]
   PORT = "8000"
