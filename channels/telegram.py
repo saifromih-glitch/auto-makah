@@ -173,7 +173,20 @@ async def telegram_webhook(req: Request):
             await send_telegram_message(chat_id, "\n".join(lines))
             return JSONResponse({"status": "create"})
 
-        # Handle /new_* commands — create from template
+        # Handle /clone — self-replication
+        if text.startswith("/clone "):
+            from factory.cloner import cloner
+            parts = text[7:].strip().split(" ", 1)
+            domain = parts[0] if parts else "general"
+            display_name = parts[1] if len(parts) > 1 else f"وكيل {domain}"
+            result = cloner.clone_to_domain(domain, display_name)
+            await send_telegram_message(chat_id,
+                f"✅ تم استنساخ وكيل جديد:\n"
+                f"الاسم: {result['agent_name']}\n"
+                f"المجال: {result['domain']}\n"
+                f"العرض: {result['display_name']}\n"
+                f"\nالوكيل جاهز للاستشارات.")
+            return JSONResponse({"status": "clone"})
         if text.startswith("/new_"):
             from factory.builder import factory
             template_name = text[5:]  # remove /new_

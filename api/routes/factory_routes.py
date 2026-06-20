@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from factory.builder import factory
+from factory.cloner import cloner
 
 router = APIRouter()
 
@@ -18,6 +19,12 @@ class CustomAgentConfig(BaseModel):
     description: str = ""
     system_prompt: str = ""
     knowledge_domains: list = []
+
+
+class CloneRequest(BaseModel):
+    domain: str
+    display_name: str
+    system_prompt: str = ""
 
 
 @router.get("/templates")
@@ -49,3 +56,16 @@ async def create_custom(req: CustomAgentConfig):
 async def factory_status():
     """Get factory status."""
     return JSONResponse(factory.status())
+
+
+@router.post("/clone")
+async def clone_agent(req: CloneRequest):
+    """Clone platform into domain-specific agent."""
+    result = cloner.clone_to_domain(req.domain, req.display_name, req.system_prompt)
+    return JSONResponse(result, status_code=201)
+
+
+@router.get("/clones")
+async def clone_status():
+    """Get cloner status."""
+    return JSONResponse(cloner.status())
