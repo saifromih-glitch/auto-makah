@@ -832,8 +832,6 @@ async function sendMessage() {
   addTyping();
 
   try {
-    // Call local API if available, otherwise use fetch
-    const baseUrl = window.location.origin;
     const resp = await fetch(`${baseUrl}/api/chat/chat`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -849,19 +847,23 @@ async function sendMessage() {
 
     if (resp.ok) {
       const data = await resp.json();
-      addMessage(data.reply || 'تم استلام طلبك', 'agent',
-        data.model ? `⚡ ${data.model} · ${data.latency_ms || 0}ms` : '');
+      if (data.reply && data.reply.length > 0 && !data.error) {
+        addMessage(data.reply, 'agent',
+          `⚡ ${data.model || 'Auto Makah'} · ${data.latency_ms || 0}ms · ${data.tokens || 0} tokens`);
+        document.getElementById('current-model').textContent = data.model || 'Auto Makah';
+      } else {
+        // Fallback to simulation only if API returned empty
+        const simResp = await simulateResponse(text);
+        addMessage(simResp, 'agent', '🟡 وضع محاكاة · API غير متصل');
+      }
     } else {
-      // Fallback: simulated response
       const simResp = await simulateResponse(text);
-      removeTyping();
-      addMessage(simResp, 'agent', '⚡ GLM-5.2 · محاكاة');
+      addMessage(simResp, 'agent', '🟡 وضع محاكاة · API غير متصل');
     }
   } catch(e) {
     removeTyping();
-    // Simulated response for demo
     const simResp = await simulateResponse(text);
-    addMessage(simResp, 'agent', '⚡ GLM-5.2 · محاكاة');
+    addMessage(simResp, 'agent', '🟡 وضع محاكاة · شبكة غير متصلة');
   }
 }
 
@@ -963,9 +965,9 @@ async function fetchHealth() {
     if (resp.ok) {
       const data = await resp.json();
       document.getElementById('status-panel').innerHTML = `
-        ✅ متصل<br>
+        🟢 متصل مباشر<br>
         🤖 ${data.agents || 8} وكلاء<br>
-        🛠️ ${data.tools || 26} أداة<br>
+        🛠️ ${data.tools || 31} أداة<br>
         📦 v${data.version || '0.1.0'}
       `;
       document.getElementById('current-model').textContent = 'GLM-5.2 + Kimi K2.7';
