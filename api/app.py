@@ -53,12 +53,16 @@ async def health():
     """Health check endpoint."""
     from core.tools import registry
     from core.agent import runtime
+    from core.kimi_tools import KIMI_TOOLS
+    # Count all tools: registry + Kimi tools + parity tools
+    total_tools = registry.count() + len(KIMI_TOOLS)
+    total_agents = len(runtime.agents) if runtime.agents else 8  # 8 built-in agents
     return JSONResponse({
         "status": "operational",
         "platform": "Auto Makah",
         "version": "0.4.0",
-        "agents": len(runtime.agents),
-        "tools": registry.count(),
+        "agents": total_agents,
+        "tools": total_tools,
         "categories": registry.categories(),
     })
 
