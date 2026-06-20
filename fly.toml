@@ -1,9 +1,6 @@
 app = "auto-makah"
 primary_region = "ams"
 
-[build]
-  builder = "dockerfile"
-
 [env]
   PORT = "8000"
 
