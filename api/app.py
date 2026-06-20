@@ -10,7 +10,7 @@ import os
 app = FastAPI(
     title="Auto Makah",
     description="🕋 AI Agent Platform — Twin of OpenClaw — Saudi Arabia",
-    version="0.1.0",
+    version="0.4.0",
 )
 
 # CORS — allow all origins in dev
@@ -56,7 +56,7 @@ async def health():
     return JSONResponse({
         "status": "operational",
         "platform": "Auto Makah",
-        "version": "0.1.0",
+        "version": "0.4.0",
         "agents": len(runtime.agents),
         "tools": registry.count(),
         "categories": registry.categories(),

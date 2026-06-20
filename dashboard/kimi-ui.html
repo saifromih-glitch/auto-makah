@@ -851,19 +851,17 @@ async function sendMessage() {
         addMessage(data.reply, 'agent',
           `⚡ ${data.model || 'Auto Makah'} · ${data.latency_ms || 0}ms · ${data.tokens || 0} tokens`);
         document.getElementById('current-model').textContent = data.model || 'Auto Makah';
+        document.getElementById('status-panel').innerHTML = '🟢 متصل · ' + (data.model || 'Live');
       } else {
-        // Fallback to simulation only if API returned empty
-        const simResp = await simulateResponse(text);
-        addMessage(simResp, 'agent', '🟡 وضع محاكاة · API غير متصل');
+        addMessage('⚠️ تم استلام رد فارغ من الخادم — جارٍ إعادة المحاولة...', 'agent', '⚠️ رد فارغ');
       }
     } else {
-      const simResp = await simulateResponse(text);
-      addMessage(simResp, 'agent', '🟡 وضع محاكاة · API غير متصل');
+      const errText = await resp.text().catch(() => 'Unknown error');
+      addMessage('❌ فشل الاتصال بالخادم: ' + resp.status + ' — تأكد من اتصالك وحاول مجدداً', 'agent', '🔴 خطأ ' + resp.status);
     }
   } catch(e) {
     removeTyping();
-    const simResp = await simulateResponse(text);
-    addMessage(simResp, 'agent', '🟡 وضع محاكاة · شبكة غير متصلة');
+    addMessage('❌ لا يمكن الاتصال بالخادم — تحقق من اتصال الانترنت أو حالة السيرفر', 'agent', '🔴 غير متصل');
   }
 }
 
@@ -968,12 +966,12 @@ async function fetchHealth() {
         🟢 متصل مباشر<br>
         🤖 ${data.agents || 8} وكلاء<br>
         🛠️ ${data.tools || 31} أداة<br>
-        📦 v${data.version || '0.1.0'}
+        📦 v${data.version || '0.4.0'}
       `;
       document.getElementById('current-model').textContent = 'GLM-5.2 + Kimi K2.7';
     }
   } catch(e) {
-    document.getElementById('status-panel').innerHTML = '🟡 محاكاة (API غير متصل)';
+    document.getElementById('status-panel').innerHTML = '🔴 API غير متصل';
   }
 }
 
