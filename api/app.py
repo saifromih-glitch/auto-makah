@@ -5,22 +5,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
-from contextlib import asynccontextmanager
 import os
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
-    from db.connection import init_db
-    await init_db()
-    yield
 
 app = FastAPI(
     title="Auto Makah",
     description="🕋 AI Agent Platform — Twin of OpenClaw — Saudi Arabia",
     version="0.1.0",
-    lifespan=lifespan,
 )
 
 # CORS — allow all origins in dev
