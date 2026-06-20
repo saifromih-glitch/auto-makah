@@ -250,6 +250,69 @@ class ZenMuxConnector(ModelConnector):
             return ModelResponse(text="", model=self.model, error=str(e))
 
 
+class KimiAPIConnector(ModelConnector):
+    """Kimi Direct API — K2.7 Code (best coding), K2.6 (multimodal).
+    OpenAI-compatible — base_url: https://api.moonshot.cn/v1"""
+
+    BASE_URL = "https://api.moonshot.cn/v1/chat/completions"
+
+    MODELS = {
+        "k2.7-code": "kimi-k2.7-code",
+        "k2.7-code-highspeed": "kimi-k2.7-code-highspeed",
+        "k2.6": "kimi-k2.6",
+        "k2.5": "kimi-k2.5",
+    }
+
+    def __init__(self, api_key: str = None, model: str = "k2.7-code"):
+        self.api_key = api_key or os.getenv("KIMI_API_KEY", "")
+        self.model = self.MODELS.get(model, model)
+
+    async def call(self, prompt: str, system_prompt: str = "", max_tokens: int = 2000) -> ModelResponse:
+        import time, httpx
+        start = time.time()
+
+        if not self.api_key:
+            return ModelResponse(text="", model=f"kimi/{self.model}", error="No KIMI_API_KEY")
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                resp = await client.post(
+                    self.BASE_URL,
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": messages,
+                        "max_tokens": max_tokens,
+                        "temperature": 0.3,
+                    },
+                )
+                data = resp.json()
+
+                if "choices" in data:
+                    msg = data["choices"][0]["message"]
+                    text = msg.get("content", "")
+                    return ModelResponse(
+                        text=text,
+                        model=f"kimi/{self.model}",
+                        tokens_in=data.get("usage", {}).get("prompt_tokens", 0),
+                        tokens_out=data.get("usage", {}).get("completion_tokens", 0),
+                        latency_ms=int((time.time() - start) * 1000),
+                    )
+                return ModelResponse(text="", model=f"kimi/{self.model}", error=str(data))
+        except httpx.HTTPStatusError as e:
+            return ModelResponse(text="", model=f"kimi/{self.model}", error=f"HTTP {e.response.status_code}")
+        except Exception as e:
+            return ModelResponse(text="", model=f"kimi/{self.model}", error=str(e))
+
+
 class HybridRouter:
     """Route to different models based on task type."""
 
@@ -272,14 +335,16 @@ class HybridRouter:
 
     def __init__(self):
         self.zenmux = ZenMuxConnector()
-        self.kimi = ZenMuxConnector(model="moonshotai/kimi-k2.7-code")
+        self.kimi_direct = KimiAPIConnector()
+        self.kimi_zenmux = ZenMuxConnector(model="moonshotai/kimi-k2.7-code")
         self.glm4 = GLM4Connector()
         self.gpt4o = GPT4oMiniConnector()
         self.nemotron = NemotronConnector()
 
         # Model selection rules
         self.text_chain = FallbackChain().add(self.zenmux).add(self.nemotron)
-        self.code_chain = FallbackChain().add(self.kimi).add(self.zenmux)
+        # Code: try direct Kimi → ZenMux Kimi → ZenMux general → Nemotron
+        self.code_chain = FallbackChain().add(self.kimi_direct).add(self.kimi_zenmux).add(self.zenmux)
         self.file_chain = FallbackChain().add(self.gpt4o).add(self.nemotron).add(self.zenmux)
         self.accounting_chain = FallbackChain().add(self.gpt4o).add(self.nemotron)
 

@@ -180,6 +180,22 @@ async def telegram_webhook(req: Request):
             await send_telegram_message(chat_id, "\n".join(lines))
             return JSONResponse({"status": "create"})
 
+        # Handle /kimi — direct Kimi API coding
+        if text.startswith("/kimi "):
+            from core.connectors import KimiAPIConnector
+            kimi = KimiAPIConnector()
+            code_prompt = text[6:].strip()
+            await send_telegram_message(chat_id, "💻 Kimi K2.7 Code — جاري البرمجة...")
+            resp = await kimi.call(code_prompt, system_prompt="You are Kimi K2.7 Code, the world's best coding AI. Write clean, production-ready code. Reply in Arabic if the user asks in Arabic.", max_tokens=4000)
+            if resp.ok:
+                clean = _deduplicate(resp.text)
+                await send_telegram_message(chat_id,
+                    f"💻 **Kimi K2.7 Code** (أقوى نموذج برمجة)\n"
+                    f"⚡ {resp.tokens_in + resp.tokens_out} tokens | {resp.latency_ms}ms\n\n{clean}")
+            else:
+                await send_telegram_message(chat_id, f"❌ Kimi API غير متاح: {resp.error}\nالمفتاح: KIMI_API_KEY")
+            return JSONResponse({"status": "kimi"})
+
         # Handle /clone — self-replication
         if text.startswith("/clone "):
             from factory.cloner import cloner
@@ -218,6 +234,7 @@ async def telegram_webhook(req: Request):
 ═ أوامر سريعة:
   /agents — عرض الوكلاء النشطين
   /create — إنشاء وكيل جديد
+  /kimi — برمجة بقوة Kimi K2.7 Code
 
 ═ فقط اكتب استشارتك —
   أو اختر تخصصاً أعلاه."""
