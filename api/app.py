@@ -206,12 +206,12 @@ async def list_skill_files():
 
 @app.get("/api/agent-skills/{name}")
 async def get_skill(name: str):
-    """Load a specific Lopp skill file."""
+    """Load a specific skill file (SKILL.md v2.0 or legacy .skill)."""
     from core.skill_loader import load_skill
-    content = load_skill(name)
-    if not content:
+    skill = load_skill(name)
+    if not skill:
         return JSONResponse({"error": "skill not found"}, status_code=404)
-    return JSONResponse({"name": name, "content": content})
+    return JSONResponse(skill)
 
 # ═══ 🏗️ BRV Pipeline Status ═══
 @app.get("/api/brv/status")
