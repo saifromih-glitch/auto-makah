@@ -13,6 +13,19 @@ app = FastAPI(
     version="0.4.0",
 )
 
+# 🔁 Lopp Step 5: Self-waking health loop (starts on app startup)
+@app.on_event("startup")
+async def start_health_loop():
+    try:
+        from core.health_loop import HealthLoop
+        hl = HealthLoop()
+        hl.start()
+        import logging
+        logging.getLogger("auto_makah").info("🫀 Health Loop started")
+    except Exception as e:
+        import logging
+        logging.getLogger("auto_makah").warning(f"Health Loop failed to start: {e}")
+
 # CORS — allow all origins in dev
 app.add_middleware(
     CORSMiddleware,

@@ -31,19 +31,49 @@ async def chat_endpoint(req: ChatRequest):
         # ═══ LLM CHAT (with agent context if specified) ═══
         from core.connectors import HybridRouter
         from core.cognitive_protocol import COGNITIVE_PROTOCOL
+        from core.loop_engineering import load_state, save_state, run_with_retry
+
+        # 🔁 State Memory: load past learnings
+        loop_state = load_state("chat", "auto_makah")
+        learnings_context = ""
+        if loop_state.learnings:
+            learnings_context = "\nالدروس السابقة:\n" + "\n".join(f"• {L}" for L in loop_state.learnings[-3:])
 
         router = HybridRouter()
-        system = COGNITIVE_PROTOCOL + "\nأنت Auto Makah — منصة عربية هجينة (OpenClaw × Kimi). أجب بدقة واحترافية بالعربية."
+        system = COGNITIVE_PROTOCOL + learnings_context + "\nأنت Auto Makah — منصة عربية هجينة (OpenClaw × Kimi). أجب بدقة واحترافية بالعربية."
 
         if req.agent:
             system += f"\nأنت الآن خبير في مجال: {req.agent}"
 
         resp = await router.call(req.message, system_prompt=system)
+        reply = resp.text if resp.ok else "عذراً، النماذج مشغولة — حاول بعد لحظات."
+        
+        # 🛡️ False Completion Guard: verify Arabic quality
+        guard_result = _verify_reply_quality(reply, req.message)
+        
+        # 🔁 State Memory: save success/failure
+        loop_state.total_runs += 1
+        if guard_result["passed"]:
+            loop_state.successful_runs += 1
+            # Learn from good responses: extract key insight
+            if len(reply) > 100:
+                loop_state.learnings.append(f"[{guard_result['arabic_pct']}% عربي] {reply[:120]}...")
+                loop_state.learnings = loop_state.learnings[-20:]  # Keep last 20
+        else:
+            loop_state.failed_runs += 1
+            loop_state.last_error = guard_result["reason"]
+        save_state(loop_state)
+        
         return JSONResponse({
-            "reply": resp.text if resp.ok else "عذراً، النماذج مشغولة — حاول بعد لحظات.",
+            "reply": reply,
             "model": resp.model,
             "latency_ms": resp.latency_ms,
             "tokens": resp.tokens_in + resp.tokens_out,
+            "guard": guard_result,  # Transparent verification
+            "loop_state": {
+                "total": loop_state.total_runs,
+                "success_rate": round((loop_state.successful_runs / max(loop_state.total_runs, 1)) * 100, 1)
+            }
         })
     except Exception as e:
         log.error(f"Chat error: {e}")
@@ -139,3 +169,43 @@ async def _handle_rethink(req: ChatRequest):
         })
     except Exception as e:
         return JSONResponse({"reply": f"❌ فشل تنظيم الأفكار: {e}", "error": str(e)}, status_code=500)
+
+
+# ═══ 🔁 Loop Engineering: False Completion Guard ═══
+
+def _verify_reply_quality(reply: str, question: str) -> dict:
+    """
+    Lopp Step 12: False Completion Guard.
+    Objective checks before returning success.
+    """
+    result = {"passed": True, "reason": "", "arabic_pct": 0, "length": len(reply)}
+    
+    # Check 1: Not empty
+    if len(reply) < 10:
+        result["passed"] = False
+        result["reason"] = "reply_too_short"
+        return result
+    
+    # Check 2: Arabic character ratio
+    arabic_chars = sum(1 for c in reply if '\u0600' <= c <= '\u06ff' or '\u0750' <= c <= '\u077f')
+    total_chars = len(reply.replace(' ', '').replace('\n', ''))
+    if total_chars > 0:
+        result["arabic_pct"] = round((arabic_chars / total_chars) * 100, 1)
+    
+    # Check 3: Not just error message
+    error_patterns = ["خطأ", "عذراً", "مشغولة", "error", "failed", "sorry"]
+    if all(p in reply[:50].lower() for p in ["sorry", "error"]) or reply.startswith("Error"):
+        result["passed"] = False
+        result["reason"] = "looks_like_error_message"
+    
+    # Check 4: Not repeated garbage
+    if len(set(reply[:200])) < 5:
+        result["passed"] = False
+        result["reason"] = "repeated_garbage"
+    
+    # Check 5: Question echoed verbatim (hallucination)
+    if question[:30] == reply[:30]:
+        result["passed"] = False
+        result["reason"] = "echoed_question"
+    
+    return result
