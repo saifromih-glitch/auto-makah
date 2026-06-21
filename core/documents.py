@@ -37,10 +37,11 @@ def generate_xlsx(title: str, headers: list, rows: list, sheet_name: str = "Shee
         for c, val in enumerate(row, 1):
             ws.cell(row=r, column=c, value=val).alignment = Alignment(horizontal="center")
 
-    # Column widths
-    for col in ws.columns:
-        max_len = max((len(str(cell.value or "")) for cell in col), default=8)
-        ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 40)
+    # Column widths (skip merged cells)
+    for col_cells in ws.columns:
+        max_len = max((len(str(cell.value or "")) for cell in col_cells if not isinstance(cell, type(ws['A1'])) and cell.value), default=8)
+        col_letter = col_cells[0].column_letter if col_cells else 'A'
+        ws.column_dimensions[col_letter].width = min(max_len + 4, 40)
 
     path = _save_file(title, ".xlsx")
     wb.save(path)
