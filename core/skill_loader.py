@@ -36,9 +36,15 @@ def load_skill(name: str) -> dict | None:
     Load a skill by name. Returns {content, meta, references, name}.
     Supports: name.skill (legacy), name/SKILL.md (v2.0)
     """
-    # Try v2.0 SKILL.md first
-    v2_path = os.path.join(SKILLS_DIR, name, "SKILL.md")
-    if os.path.isfile(v2_path):
+    # Try v2.0 SKILL.md first (case-insensitive for Docker compatibility)
+    v2_path = None
+    for candidate in [os.path.join(SKILLS_DIR, name, "SKILL.md"), 
+                      os.path.join(SKILLS_DIR, name, "skill.md")]:
+        if os.path.isfile(candidate):
+            v2_path = candidate
+            break
+    
+    if v2_path:
         with open(v2_path, 'r', encoding='utf-8') as f:
             raw = f.read()
         meta = _parse_frontmatter(raw)
@@ -93,10 +99,13 @@ def list_skills() -> list:
         return skills
 
     seen = set()
-    # v2.0 SKILL.md directories
+    # v2.0 SKILL.md directories (case-insensitive)
     for name in os.listdir(SKILLS_DIR):
         skill_path = os.path.join(SKILLS_DIR, name)
-        if os.path.isdir(skill_path) and os.path.isfile(os.path.join(skill_path, "SKILL.md")):
+        if os.path.isdir(skill_path) and (
+            os.path.isfile(os.path.join(skill_path, "SKILL.md")) or
+            os.path.isfile(os.path.join(skill_path, "skill.md"))
+        ):
             s = load_skill(name)
             if s:
                 skills.append({
