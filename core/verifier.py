@@ -349,3 +349,72 @@ def heal_all_pages() -> dict:
         "total_fixes_applied": total_fixes,
         "results": results,
     }
+
+
+# ═══ 📲 Mohammed Notification ═══
+def notify_mohammed(message: str) -> bool:
+    """Send Telegram notification to Mohammed when platform needs attention."""
+    import os
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if not token:
+        log.warning("No TELEGRAM_BOT_TOKEN — can't notify Mohammed")
+        return False
+    
+    mohammed_chat_id = "5660460079"  # Mohammed's Telegram ID
+    
+    try:
+        body = json.dumps({
+            "chat_id": mohammed_chat_id,
+            "text": message,
+            "parse_mode": "HTML",
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            data=body,
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=5)
+        return True
+    except Exception as e:
+        log.error(f"Failed to notify Mohammed: {e}")
+        return False
+
+
+def heal_and_notify() -> dict:
+    """
+    Full cycle: Verify → Heal → Re-verify → Notify Mohammed if needed.
+    This is the autonomous loop that runs periodically.
+    """
+    # Step 1: Verify all pages
+    before = verify_all_pages()
+    
+    # Step 2: Heal what we can
+    heal_result = heal_all_pages()
+    
+    # Step 3: Re-verify
+    after = verify_all_pages()
+    
+    # Step 4: Build notification
+    alerts = []
+    for page_name, report in after.get("pages", {}).items():
+        if report.get("score", "0%") != "100.0%":
+            failures = [c for c in report.get("checks", []) if not c.get("passed")]
+            for f in failures:
+                if f["name"] not in AUTO_FIXES:
+                    alerts.append(f"{page_name}: {f['name']} — {f.get('suggestion', 'يحتاج تدخل يدوي')}")
+    
+    # Step 5: Notify Mohammed if unfixable issues remain
+    if alerts:
+        message = "🕋 <b>Auto Makah — مشاكل تحتاج تدخلك</b>\n\n"
+        message += "\n".join(f"• {a}" for a in alerts[:5])
+        message += f"\n\n🔗 <a href='https://auto-makah.fly.dev'>افتح المنصة</a>"
+        notify_mohammed(message)
+    
+    return {
+        "before_score": before.get("average_score"),
+        "after_score": after.get("average_score"),
+        "healed": heal_result.get("pages_healed", 0),
+        "unfixable_alerts": len(alerts),
+        "mohammed_notified": bool(alerts),
+    }

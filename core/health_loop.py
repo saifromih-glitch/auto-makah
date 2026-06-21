@@ -36,8 +36,9 @@ class HealthLoop:
         self.running = False
 
     async def _check_once(self) -> dict:
-        """Single health check — returns status."""
+        """Single health check + heal if needed — returns status."""
         try:
+            # Check health
             req = urllib.request.Request(HEALTH_URL, headers={"Accept": "application/json"})
             r = urllib.request.urlopen(req, timeout=10)
             data = json.loads(r.read().decode())
@@ -46,13 +47,22 @@ class HealthLoop:
             agents = data.get("agents", 0)
             tools = data.get("tools", 0)
 
+            # Also run self-healing verification on every check
+            try:
+                from core.verifier import heal_and_notify
+                heal_report = heal_and_notify()
+                unfixable = heal_report.get("unfixable_alerts", 0)
+            except Exception:
+                unfixable = -1  # Heal not available
+
             return {
                 "healthy": status == "operational",
                 "status": status,
                 "version": version,
                 "agents": agents,
                 "tools": tools,
-                "latency_ms": 0,  # Simplified
+                "latency_ms": 0,
+                "unfixable_alerts": unfixable,
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:

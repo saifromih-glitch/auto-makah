@@ -349,3 +349,9 @@ async def heal_page(page: str):
     """Auto-fix a specific page."""
     from core.verifier import auto_fix_page
     return JSONResponse(auto_fix_page(page))
+
+@app.post("/api/heal-and-notify")
+async def heal_notify():
+    """Full cycle: Verify → Heal → Notify Mohammed."""
+    from core.verifier import heal_and_notify
+    return JSONResponse(heal_and_notify())
