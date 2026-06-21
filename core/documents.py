@@ -157,69 +157,80 @@ async def ai_generate_document(
     topic: str,
     detail: str = "",
 ) -> dict:
-    """
-    Use AI to generate document content, then render it.
-    Returns {"path": str, "type": str, "filename": str}
-    """
+    """Use AI to generate document content, then render it."""
     from core.connectors import HybridRouter
     router = HybridRouter()
 
-    # Step 1: Ask AI to generate structured content
-    prompts = {
-        "xlsx": f"""Generate a spreadsheet about: {topic}
+    # ─── Simple markdown-table prompt (GLM-5.2 is good at this) ───
+    prompt = f"""Create a table about: {topic}
 {detail}
-Return ONLY valid JSON in this format:
-{{"title": "...", "headers": ["Col1", "Col2", ...], "rows": [["val", "val"], ...]}}
-Include 5+ realistic data rows. JSON ONLY, no other text.""",
 
-        "docx": f"""Write a report about: {topic}
-{detail}
-Return ONLY valid JSON:
-{{"title": "...", "sections": [{{"heading": "...", "body": "..."}}]}}
-Include 3+ sections. JSON ONLY.""",
+Respond with ONLY a markdown table like this:
+| Column1 | Column2 | Column3 |
+|---------|---------|---------|
+| Data1   | Data2   | Data3   |
+| Data4   | Data5   | Data6   |
 
-        "pptx": f"""Create presentation slides about: {topic}
-{detail}
-Return ONLY valid JSON:
-{{"title": "...", "slides": [{{"title": "...", "content": "..."}}]}}
-Include 5+ slides. JSON ONLY.""",
+Include 5-8 realistic data rows. The table ONLY — no other text."""
 
-        "pdf": f"""Write a print-ready report about: {topic}
-{detail}
-Return ONLY valid JSON:
-{{"title": "...", "sections": [{{"heading": "...", "body": "..."}}]}}
-Include 4+ sections. JSON ONLY."""
-    }
-
-    prompt = prompts.get(doc_type, prompts["pdf"])
-    
     try:
         resp = await router.call(
-            prompt, 
-            system_prompt="You are a JSON generator. Return ONLY valid JSON. No markdown, no explanation.",
-            max_tokens=3000
+            prompt,
+            system_prompt="You are a data generator. Output ONLY a markdown table with realistic data. No introduction, no explanation.",
+            max_tokens=2000
         )
     except Exception as e:
         return {"error": f"AI call failed: {str(e)}"}
 
-    if not resp or not resp.ok or not resp.text:
-        # Fallback: generate basic document without AI
-        return _generate_fallback(doc_type, topic, detail)
-
-    # Parse JSON from response
-    text = resp.text.strip()
-    if "```json" in text:
-        text = text.split("```json")[1].split("```")[0].strip()
-    elif "```" in text:
-        text = text.split("```")[1].split("```")[0].strip()
+    # ─── Parse markdown table ───
+    if resp and resp.ok and resp.text:
+        parsed = _parse_markdown_table(resp.text)
+        if parsed and parsed["rows"]:
+            return _render_document(doc_type, {
+                "title": topic,
+                "headers": parsed["headers"],
+                "rows": parsed["rows"],
+                "sections": [{"heading": topic, "body": resp.text}],
+                "slides": [{"title": topic, "content": resp.text}],
+            }, topic)
     
-    try:
-        data = json.loads(text)
-    except json.JSONDecodeError:
-        return _generate_fallback(doc_type, topic, detail)
+    # Fallback
+    return _generate_fallback(doc_type, topic, detail)
 
-    # Step 2: Render to file
-    return _render_document(doc_type, data, topic)
+
+def _parse_markdown_table(text: str) -> dict | None:
+    """Parse a markdown table from AI output. Returns {headers, rows} or None."""
+    import re
+    lines = text.strip().split("\n")
+    
+    # Find table lines (lines with |)
+    table_lines = [l.strip() for l in lines if l.strip().startswith("|") and l.strip().endswith("|")]
+    
+    if len(table_lines) < 2:
+        return None
+    
+    def _parse_row(line: str) -> list:
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        return [c for c in cells if c]  # remove empty
+    
+    headers = _parse_row(table_lines[0])
+    
+    # Skip separator line (|---|---|)
+    rows = []
+    for line in table_lines[1:]:
+        row = _parse_row(line)
+        if row and not all(c.replace("-", "").replace(" ", "") == "" for c in row):
+            rows.append(row)
+    
+    if headers and rows:
+        # Ensure all rows have same length as headers
+        for i, row in enumerate(rows):
+            while len(row) < len(headers):
+                row.append("")
+            rows[i] = row[:len(headers)]
+        return {"headers": headers, "rows": rows}
+    
+    return None
 
 
 def _generate_fallback(doc_type: str, topic: str, detail: str = "") -> dict:
