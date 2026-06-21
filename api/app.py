@@ -395,3 +395,74 @@ async def list_schedules_api():
     """List all scheduled scrapes."""
     from core.scraper import list_schedules
     return JSONResponse({"schedules": list_schedules()})
+
+# ═══ 🧠 Agent OS — Rabei Runtime ═══
+@app.get("/api/os")
+async def os_capabilities():
+    """Agent OS capabilities — what Rabei can do."""
+    from core.agent_os import get_capabilities
+    return JSONResponse(get_capabilities())
+
+@app.post("/api/os/exec")
+async def os_exec(code: str = None, lang: str = "python", timeout: int = 30):
+    """Execute code (Python/Shell) — Rabei runs it."""
+    if not code:
+        return JSONResponse({"error": "code parameter required"}, status_code=400)
+    from core.agent_os import exec_python, exec_shell
+    if lang == "shell":
+        result = exec_shell(code, timeout)
+    else:
+        result = exec_python(code, timeout)
+    return JSONResponse(result.to_dict())
+
+@app.post("/api/os/fs/{action}")
+async def os_filesystem(action: str, path: str = None, content: str = None, old_text: str = None, new_text: str = None):
+    """File system operations: list, read, write, edit, delete."""
+    from core.agent_os import fs_list, fs_read, fs_write, fs_edit, fs_delete
+    actions = {
+        "list": lambda: fs_list(path or "/"),
+        "read": lambda: fs_read(path),
+        "write": lambda: fs_write(path, content),
+        "edit": lambda: fs_edit(path, old_text, new_text),
+        "delete": lambda: fs_delete(path),
+    }
+    if action not in actions:
+        return JSONResponse({"error": f"Unknown action: {action}", "available": list(actions.keys())}, status_code=400)
+    try:
+        result = actions[action]()
+        if isinstance(result, list):
+            return JSONResponse(result)
+        return JSONResponse(result.to_dict())
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/os/git/{action}")
+async def os_git(action: str, message: str = None, count: int = 5):
+    """Git operations: status, commit, push, log."""
+    from core.agent_os import git_status, git_commit, git_push, git_log
+    actions = {
+        "status": git_status,
+        "commit": lambda: git_commit(message or "auto-makah agent update"),
+        "push": git_push,
+        "log": lambda: git_log(count),
+    }
+    if action not in actions:
+        return JSONResponse({"error": f"Unknown action: {action}", "available": list(actions.keys())}, status_code=400)
+    result = actions[action]()
+    return JSONResponse(result.to_dict())
+
+@app.post("/api/os/deploy")
+async def os_deploy():
+    """Deploy Auto Makah to Fly.io."""
+    from core.agent_os import deploy_to_fly
+    result = deploy_to_fly()
+    return JSONResponse(result.to_dict())
+
+@app.post("/api/os/web")
+async def os_web_fetch(url: str = None):
+    """Fetch a URL — Rabei reads the web."""
+    if not url:
+        return JSONResponse({"error": "url parameter required"}, status_code=400)
+    from core.agent_os import web_fetch
+    result = web_fetch(url)
+    return JSONResponse(result.to_dict())
