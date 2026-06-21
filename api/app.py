@@ -336,3 +336,16 @@ async def self_test():
     from core.verifier import quick_self_test
     result = quick_self_test()
     return Response(result, media_type="text/plain; charset=utf-8")
+
+# ═══ 🏥 Self-Healing Engine ═══
+@app.post("/api/heal")
+async def heal_all():
+    """Auto-detect and fix all issues on all pages."""
+    from core.verifier import heal_all_pages
+    return JSONResponse(heal_all_pages())
+
+@app.post("/api/heal/{page:path}")
+async def heal_page(page: str):
+    """Auto-fix a specific page."""
+    from core.verifier import auto_fix_page
+    return JSONResponse(auto_fix_page(page))

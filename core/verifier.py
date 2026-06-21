@@ -242,3 +242,110 @@ def quick_self_test() -> str:
 
 if __name__ == "__main__":
     print(quick_self_test())
+
+
+# ═══ 🏥 Self-Healing Engine ═══
+# Automatically fixes detected issues without human intervention
+
+AUTO_FIXES = {
+    "text_wrapping": {
+        "selector": "body{",
+        "css_rule": "body{word-break:break-word;overflow-wrap:break-word;",
+        "description": "Added word-break and overflow-wrap for mobile text",
+    },
+    "viewport_meta": {
+        "selector": "<head>",
+        "css_rule": '<head>\n<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+        "description": "Added viewport meta tag",
+    },
+}
+
+
+def auto_fix_page(page_name: str) -> dict:
+    """
+    Detect issues → Auto-fix what we can → Re-verify.
+    Returns: {page, fixes_applied, before_score, after_score}
+    """
+    file_map = {
+        "/": "landing.html",
+        "/kimi": "kimi-ui.html", 
+        "/skills": "skills-store.html",
+    }
+    
+    path = None
+    filename = None
+    for p, f in file_map.items():
+        if p == page_name or f == page_name:
+            path = p
+            filename = f
+            break
+    
+    if not filename:
+        return {"error": f"Unknown page: {page_name}"}
+    
+    base = os.path.dirname(os.path.dirname(__file__))
+    filepath = os.path.join(base, "dashboard", filename)
+    
+    if not os.path.isfile(filepath):
+        return {"error": f"File not found: {filepath}"}
+    
+    # Step 1: Verify before
+    before = verify_page(path)
+    
+    # Step 2: Read the file
+    with open(filepath, 'r', encoding='utf-8') as f:
+        html = f.read()
+    
+    original = html
+    fixes_applied = []
+    
+    # Step 3: Apply auto-fixes
+    for check in before.checks:
+        if not check.passed and check.name in AUTO_FIXES:
+            fix = AUTO_FIXES[check.name]
+            old = fix["selector"]
+            new = fix["css_rule"]
+            if old in html:
+                html = html.replace(old, new, 1)
+                fixes_applied.append({
+                    "issue": check.name,
+                    "old": old[:60],
+                    "new": new[:60],
+                    "description": fix["description"],
+                })
+    
+    # Step 4: Write fixed file
+    if html != original:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(html)
+    
+    # Step 5: Re-verify
+    after = verify_page(path)
+    
+    return {
+        "page": filename,
+        "fixes_applied": len(fixes_applied),
+        "fixes": fixes_applied,
+        "before_score": before.score(),
+        "after_score": after.score(),
+        "healed": after.score() > before.score(),
+    }
+
+
+def heal_all_pages() -> dict:
+    """Auto-fix all pages and return healing report."""
+    results = []
+    for page in ["/", "/kimi", "/skills"]:
+        result = auto_fix_page(page)
+        results.append(result)
+    
+    healed = sum(1 for r in results if r.get("healed"))
+    total_fixes = sum(r.get("fixes_applied", 0) for r in results)
+    
+    return {
+        "platform": "Auto Makah",
+        "action": "heal_all",
+        "pages_healed": healed,
+        "total_fixes_applied": total_fixes,
+        "results": results,
+    }
