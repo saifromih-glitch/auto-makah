@@ -111,29 +111,37 @@ def _detect_document_request(text: str) -> dict | None:
     """Detect if user is asking for a document. Returns {type, topic} or None."""
     text_lower = text.lower()
     
+    # Normalize Arabic: remove diacritics, unify alef/hamza/yeh
+    arabic_norm = str.maketrans(
+        "إأآؤئىة",  # from
+        "ااااوييه"  # to
+    )
+    text_norm = text_lower.translate(arabic_norm)
+    
     doc_patterns = {
         "xlsx": [
             "ملف اكسل", "excel", "xlsx", "جدول بيانات", "جدول اكسل",
             "spreadsheet", "اعمل لي جدول", "سوي لي جدول", "ابي جدول",
-            "اعمل جدول", "سوي جدول", "أنشئ جدول", "اصنع جدول",
-            "جدول تكاليف", "جدول ميزانية", "جدول مقارنة", "جدول مالي",
+            "اعمل جدول", "سوي جدول", "انشي جدول", "اصنع جدول", "انشا جدول",
+            "جدول تكاليف", "جدول ميزانيه", "جدول مقارنه", "جدول مالي",
+            "اكسل", "excel sheet", "اعمللي جدول", "سويلي جدول",
         ],
         "docx": [
             "ملف وورد", "word", "docx", "تقرير وورد", "مستند",
             "اعمل لي تقرير", "سوي لي تقرير", "اكتب تقرير",
         ],
         "pptx": [
-            "عرض تقديمي", "بوربوينت", "powerpoint", "pptx", "شرائح", "سلايدات",
+            "عرض تقديمي", "بوربوينت", "powerpoint", "pptx", "شرايح", "سلايدات",
             "presentation", "اعمل لي عرض", "سوي لي عرض",
         ],
         "pdf": [
-            "pdf", "بي دي اف", "ملف pdf", "تقرير pdf", "احفظ كـ pdf",
+            "pdf", "بي دي اف", "ملف pdf", "تقرير pdf", "احفظ ك pdf",
         ],
     }
     
     for doc_type, keywords in doc_patterns.items():
         for kw in keywords:
-            if kw in text_lower:
+            if kw in text_norm:
                 topic = text_lower.replace(kw, "").strip().strip("!؟.،").strip()
                 if not topic:
                     topic = text
