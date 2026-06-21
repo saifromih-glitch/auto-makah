@@ -525,7 +525,6 @@ async def generate_document(req: DocGenRequest):
         path,
         media_type=media_types.get(req.type, "application/octet-stream"),
         filename=result["filename"],
-        headers={"X-Document-Title": result.get("title", req.topic)}
     )
 
 @app.get("/api/documents/list")
