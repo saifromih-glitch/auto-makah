@@ -38,14 +38,17 @@ async def kimi_ui():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard_root():
-    """Serve the main dashboard."""
+async def landing_page():
+    """Landing page — Auto Makah AI Platform."""
     import os
-    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard", "index.html")
+    base = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(base, "dashboard", "landing.html")
     if os.path.isfile(path):
         with open(path, "r", encoding="utf-8") as f:
             return HTMLResponse(f.read())
-    return HTMLResponse("<h1>Auto Makah 🕋</h1>")
+    # Fallback: redirect to Kimi UI
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/kimi")
 
 
 @app.get("/api/health")

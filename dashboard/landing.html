@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕋 Auto Makah — منصة الذكاء الاصطناعي العربية</title>
+<meta name="description" content="Auto Makah — أول منصة عربية هجينة تجمع ١٨ خبير ذكاء اصطناعي. استشارات ذكية للشركات والمؤسسات باللغة العربية.">
+<meta property="og:title" content="🕋 Auto Makah — منصة الذكاء الاصطناعي العربية">
+<meta property="og:description" content="١٨ خبير AI متخصص — استشارات مالية، قانونية، تسويقية، هندسية — بالعربي">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://auto-makah.fly.dev">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='56' font-size='56'>🕋</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0a0f14 0%,#0d1f1a 50%,#0a0f14 100%);color:#e8e4db;font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;direction:rtl}
+.grain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.02;background:radial-gradient(circle at 50% 50%,#d4a017 1px,transparent 1px);background-size:4px 4px}
+
+/* Header */
+header{position:relative;z-index:1;padding:24px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,160,23,.15)}
+.logo{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:700}
+.logo span{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:24px;font-size:14px}
+.nav-links a{color:#8a8578;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:#d4a017}
+
+/* Hero */
+.hero{position:relative;z-index:1;text-align:center;padding:100px 20px 60px}
+.hero h1{font-size:clamp(28px,5vw,48px);font-weight:700;line-height:1.3;margin-bottom:16px}
+.hero h1 .gold{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:18px;color:#8a8578;max-width:600px;margin:0 auto 40px;line-height:1.8}
+.cta-group{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-primary{background:linear-gradient(135deg,#d4a017,#b8860b);color:#0a0f14;border:none;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,160,23,.3)}
+.cta-secondary{background:transparent;color:#d4a017;border:1px solid rgba(212,160,23,.3);padding:14px 32px;border-radius:12px;font-size:16px;text-decoration:none;transition:all .2s}
+.cta-secondary:hover{background:rgba(212,160,23,.1)}
+
+/* Stats */
+.stats{position:relative;z-index:1;display:flex;justify-content:center;gap:40px;flex-wrap:wrap;padding:0 20px 60px}
+.stat-item{text-align:center}
+.stat-value{font-size:36px;font-weight:700;color:#f0c740}
+.stat-label{font-size:13px;color:#8a8578;margin-top:4px}
+
+/* Agents Section */
+.section{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 20px}
+.section h2{text-align:center;font-size:28px;margin-bottom:12px}
+.section h2 .gold{color:#d4a017}
+.section>p{text-align:center;color:#8a8578;margin-bottom:40px;font-size:15px}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:60px}
+.agent-card{background:rgba(17,24,32,.8);border:1px solid rgba(30,42,53,.5);border-radius:12px;padding:16px;text-align:center;transition:all .2s}
+.agent-card:hover{border-color:rgba(212,160,23,.3);transform:translateY(-2px)}
+.agent-icon{font-size:28px;margin-bottom:8px}
+.agent-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.agent-role{font-size:11px;color:#8a8578}
+
+/* Features */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:60px}
+.feature-card{background:rgba(17,24,32,.8);border:1px solid rgba(30,42,53,.5);border-radius:12px;padding:24px}
+.feature-icon{font-size:32px;margin-bottom:12px}
+.feature-card h3{font-size:16px;margin-bottom:8px}
+.feature-card p{font-size:13px;color:#8a8578;line-height:1.7}
+
+/* CTA Bottom */
+.cta-bottom{text-align:center;padding:60px 20px 80px;position:relative;z-index:1}
+.cta-bottom h2{font-size:24px;margin-bottom:12px}
+.cta-bottom p{color:#8a8578;margin-bottom:24px}
+
+/* Footer */
+footer{position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid rgba(212,160,23,.1);font-size:12px;color:#555}
+footer a{color:#8a8578;text-decoration:none}
+footer a:hover{color:#d4a017}
+
+@media (max-width:600px){
+  header{padding:16px 20px;flex-direction:column;gap:12px}
+  .nav-links{gap:16px}
+  .hero{padding:60px 16px 40px}
+  .stats{gap:24px}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header>
+  <div class="logo"><span>🕋 Auto Makah</span></div>
+  <div class="nav-links">
+    <a href="/kimi">المنصة</a>
+    <a href="/playground">للمطورين</a>
+    <a href="/docs">توثيق</a>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>أول <span class="gold">منصة عربية</span> للاستشارات الذكية</h1>
+  <p>١٨ خبير ذكاء اصطناعي — مالي، قانوني، تسويقي، هندسي — جاهزين لخدمتك بالعربية. دون اشتراك. دون تعقيد.</p>
+  <div class="cta-group">
+    <a href="/kimi" class="cta-primary">🚀 جرب المنصة الآن</a>
+    <a href="/playground" class="cta-secondary">📚 للمطورين ← API</a>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat-item"><div class="stat-value">١٨</div><div class="stat-label">خبير متخصص</div></div>
+  <div class="stat-item"><div class="stat-value">٥</div><div class="stat-label">أدوات Kimi</div></div>
+  <div class="stat-item"><div class="stat-value">١٠٠٪</div><div class="stat-label">عربي</div></div>
+  <div class="stat-item"><div class="stat-value">مجاني</div><div class="stat-label">النسخة التجريبية</div></div>
+</div>
+
+<div class="section">
+  <h2>🧠 <span class="gold">الخبراء</span> المتخصصون</h2>
+  <p>كل خبير مدرّب على منهجية عالمية — من Porter للاستراتيجية إلى Damodaran للمالية</p>
+  <div class="agents-grid">
+    <div class="agent-card"><div class="agent-icon">🧭</div><div class="agent-name">استراتيجي</div><div class="agent-role">Porter · 5 Forces</div></div>
+    <div class="agent-card"><div class="agent-icon">💰</div><div class="agent-name">محلل مالي</div><div class="agent-role">Damodaran · DCF</div></div>
+    <div class="agent-card"><div class="agent-icon">⚖️</div><div class="agent-name">مستشار قانوني</div><div class="agent-role">Susskind · LegalTech</div></div>
+    <div class="agent-card"><div class="agent-icon">⚙️</div><div class="agent-name">مهندس تشغيلي</div><div class="agent-role">Goldratt · TOC</div></div>
+    <div class="agent-card"><div class="agent-icon">📈</div><div class="agent-name">خبير نمو</div><div class="agent-role">Ellis · AARRR</div></div>
+    <div class="agent-card"><div class="agent-icon">👥</div><div class="agent-name">مستشار HR</div><div class="agent-role">Bock · People Analytics</div></div>
+    <div class="agent-card"><div class="agent-icon">💻</div><div class="agent-name">مهندس برمجيات</div><div class="agent-role">Fowler · Microservices</div></div>
+    <div class="agent-card"><div class="agent-icon">📊</div><div class="agent-name">عالم بيانات</div><div class="agent-role">Patil · Data Jujitsu</div></div>
+    <div class="agent-card"><div class="agent-icon">🔍</div><div class="agent-name">مهندس عكسي</div><div class="agent-role">Halvar · 4 Layer</div></div>
+    <div class="agent-card"><div class="agent-icon">🎯</div><div class="agent-name">محلل جذور</div><div class="agent-role">Ishikawa · 5 Whys</div></div>
+    <div class="agent-card"><div class="agent-icon">🎨</div><div class="agent-name">مصمم UX</div><div class="agent-role">Norman · Emotional</div></div>
+    <div class="agent-card"><div class="agent-icon">🔐</div><div class="agent-name">خبير أمني</div><div class="agent-role">Schneier · Threat Model</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>🛠️ <span class="gold">قدرات</span> المنصة</h2>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <h3>شات ذكي بالعربية</h3>
+      <p>تحدث مع ١٨ خبير يردوا عليك بالعربية الفصحى — مدعومين بنماذج GLM-5.2 و Kimi K2.6</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <h3>مولد عروض تقديمية</h3>
+      <p>اكتب المحتوى — واحصل على شرائح HTML احترافية بضغطة زر. قالب Makkah المميز</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💻</div>
+      <h3>مشغل أكواد</h3>
+      <p>نفذ Python و JavaScript في بيئة آمنة — مباشرة من المتصفح</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>منظم أفكار Rethink</h3>
+      <p>حوّل أفكارك المبعثرة إلى SWOT أو Mindmap أو تصنيفات ذكية</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔌</div>
+      <h3>API للمطورين</h3>
+      <p>OpenAI-compatible endpoint — استخدم المنصة في تطبيقاتك الخاصة</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🕋</div>
+      <h3>خبرات إسلامية</h3>
+      <p>استشارات زكاة، مواريث، حج وعمرة — بالعربي من خبراء متخصصين</p>
+    </div>
+  </div>
+</div>
+
+<div class="cta-bottom">
+  <h2>جرب <span style="color:#d4a017">مجاناً</span> — بدون تسجيل</h2>
+  <p>ابدأ محادثة مع أي خبير دلوقتي. أول ١٠٠ استشارة مجانية.</p>
+  <a href="/kimi" class="cta-primary" style="font-size:18px;padding:16px 40px">🚀 ابدأ الآن</a>
+</div>
+
+<footer>
+  <p>🕋 Auto Makah v0.4.0 — منصة الذكاء الاصطناعي العربية</p>
+  <p style="margin-top:8px"><a href="/kimi">المنصة</a> · <a href="/playground">API</a> · <a href="/docs">توثيق</a> · <a href="https://github.com/saifromih-glitch/auto-makah">GitHub</a></p>
+  <p style="margin-top:12px;color:#444">OpenClaw × Kimi Hybrid · Made in Makkah 🕋</p>
+</footer>
+</body>
+</html>
