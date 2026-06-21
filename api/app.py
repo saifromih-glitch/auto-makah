@@ -397,6 +397,25 @@ async def list_schedules_api():
     return JSONResponse({"schedules": list_schedules()})
 
 # ═══ 🧠 Agent OS — Rabei Runtime ═══
+from pydantic import BaseModel as OSModel
+
+class OSExecRequest(OSModel):
+    code: str
+    lang: str = "python"
+    timeout: int = 30
+
+class OSFSRequest(OSModel):
+    action: str  # list, read, write, edit, delete
+    path: str = "/"
+    content: str = None
+    old_text: str = None
+    new_text: str = None
+
+class OSGitRequest(OSModel):
+    action: str  # status, commit, push, log
+    message: str = None
+    count: int = 5
+
 @app.get("/api/os")
 async def os_capabilities():
     """Agent OS capabilities — what Rabei can do."""
@@ -404,51 +423,49 @@ async def os_capabilities():
     return JSONResponse(get_capabilities())
 
 @app.post("/api/os/exec")
-async def os_exec(code: str = None, lang: str = "python", timeout: int = 30):
+async def os_exec(req: OSExecRequest):
     """Execute code (Python/Shell) — Rabei runs it."""
-    if not code:
-        return JSONResponse({"error": "code parameter required"}, status_code=400)
     from core.agent_os import exec_python, exec_shell
-    if lang == "shell":
-        result = exec_shell(code, timeout)
+    if req.lang == "shell":
+        result = exec_shell(req.code, req.timeout)
     else:
-        result = exec_python(code, timeout)
+        result = exec_python(req.code, req.timeout)
     return JSONResponse(result.to_dict())
 
-@app.post("/api/os/fs/{action}")
-async def os_filesystem(action: str, path: str = None, content: str = None, old_text: str = None, new_text: str = None):
+@app.post("/api/os/fs")
+async def os_filesystem(req: OSFSRequest):
     """File system operations: list, read, write, edit, delete."""
     from core.agent_os import fs_list, fs_read, fs_write, fs_edit, fs_delete
     actions = {
-        "list": lambda: fs_list(path or "/"),
-        "read": lambda: fs_read(path),
-        "write": lambda: fs_write(path, content),
-        "edit": lambda: fs_edit(path, old_text, new_text),
-        "delete": lambda: fs_delete(path),
+        "list": lambda: fs_list(req.path),
+        "read": lambda: fs_read(req.path),
+        "write": lambda: fs_write(req.path, req.content),
+        "edit": lambda: fs_edit(req.path, req.old_text, req.new_text),
+        "delete": lambda: fs_delete(req.path),
     }
-    if action not in actions:
-        return JSONResponse({"error": f"Unknown action: {action}", "available": list(actions.keys())}, status_code=400)
+    if req.action not in actions:
+        return JSONResponse({"error": f"Unknown action: {req.action}", "available": list(actions.keys())}, status_code=400)
     try:
-        result = actions[action]()
+        result = actions[req.action]()
         if isinstance(result, list):
             return JSONResponse(result)
         return JSONResponse(result.to_dict())
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-@app.post("/api/os/git/{action}")
-async def os_git(action: str, message: str = None, count: int = 5):
+@app.post("/api/os/git")
+async def os_git(req: OSGitRequest):
     """Git operations: status, commit, push, log."""
     from core.agent_os import git_status, git_commit, git_push, git_log
     actions = {
         "status": git_status,
-        "commit": lambda: git_commit(message or "auto-makah agent update"),
+        "commit": lambda: git_commit(req.message or "auto-makah agent update"),
         "push": git_push,
-        "log": lambda: git_log(count),
+        "log": lambda: git_log(req.count),
     }
-    if action not in actions:
-        return JSONResponse({"error": f"Unknown action: {action}", "available": list(actions.keys())}, status_code=400)
-    result = actions[action]()
+    if req.action not in actions:
+        return JSONResponse({"error": f"Unknown action: {req.action}", "available": list(actions.keys())}, status_code=400)
+    result = actions[req.action]()
     return JSONResponse(result.to_dict())
 
 @app.post("/api/os/deploy")
