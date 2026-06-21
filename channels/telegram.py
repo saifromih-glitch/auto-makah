@@ -112,21 +112,32 @@ def _detect_document_request(text: str) -> dict | None:
     text_lower = text.lower()
     
     doc_patterns = {
-        "xlsx": ["ملف اكسل", "excel", "xlsx", "جدول بيانات", "جدول اكسل", "spreadsheet", "اعمل لي جدول", "سوي لي جدول"],
-        "docx": ["ملف وورد", "word", "docx", "تقرير وورد", "مستند", "اعمل لي تقرير", "سوي لي تقرير"],
-        "pptx": ["عرض تقديمي", "بوربوينت", "powerpoint", "pptx", "شرائح", "سلايدات", "presentation", "اعمل لي عرض", "سوي لي عرض"],
-        "pdf": ["pdf", "بي دي اف", "ملف pdf", "تقرير pdf", "احفظ كـ pdf"],
+        "xlsx": [
+            "ملف اكسل", "excel", "xlsx", "جدول بيانات", "جدول اكسل",
+            "spreadsheet", "اعمل لي جدول", "سوي لي جدول", "ابي جدول",
+            "اعمل جدول", "سوي جدول", "أنشئ جدول", "اصنع جدول",
+            "جدول تكاليف", "جدول ميزانية", "جدول مقارنة", "جدول مالي",
+        ],
+        "docx": [
+            "ملف وورد", "word", "docx", "تقرير وورد", "مستند",
+            "اعمل لي تقرير", "سوي لي تقرير", "اكتب تقرير",
+        ],
+        "pptx": [
+            "عرض تقديمي", "بوربوينت", "powerpoint", "pptx", "شرائح", "سلايدات",
+            "presentation", "اعمل لي عرض", "سوي لي عرض",
+        ],
+        "pdf": [
+            "pdf", "بي دي اف", "ملف pdf", "تقرير pdf", "احفظ كـ pdf",
+        ],
     }
     
     for doc_type, keywords in doc_patterns.items():
         for kw in keywords:
             if kw in text_lower:
-                # Extract topic — everything before/after the keyword
-                topic = text_lower.replace(kw, "").strip()
+                topic = text_lower.replace(kw, "").strip().strip("!؟.،").strip()
                 if not topic:
-                    # Ask the model what it's about
                     topic = text
-                return {"type": doc_type, "topic": text.replace(kw, "").strip() or text}
+                return {"type": doc_type, "topic": topic or text}
     
     return None
 
@@ -354,6 +365,32 @@ async def telegram_webhook(req: Request):
             else:
                 await send_telegram_message(chat_id, f"⚠️ تعذر إنشاء الملف: {result['error']}")
                 return JSONResponse({"status": "document_error"})
+        
+        # ─── Follow-up: User confirms file creation ───
+        confirm_words = {"نعم", "اعمله", "اعملها", "create", "ok", "yes", "تمام", "هات", "أرسل", "ارسل", "ابعت"}
+        if any(w in text.lower().split() for w in confirm_words):
+            session_id = f"tg_{chat_id}"
+            last_msgs = memory.recall(session_id, limit=2)
+            for msg in reversed(last_msgs):
+                if msg["role"] == "agent" and ("جدول" in msg["content"] or "ملف" in msg["content"] or "إكسيل" in msg["content"]):
+                    # Bot offered to create file — user confirmed
+                    doc_type = "xlsx"
+                    if "وورد" in msg["content"] or "word" in msg["content"].lower():
+                        doc_type = "docx"
+                    elif "بوربوينت" in msg["content"] or "powerpoint" in msg["content"].lower():
+                        doc_type = "pptx"
+                    elif "pdf" in msg["content"].lower():
+                        doc_type = "pdf"
+                    
+                    await send_typing(chat_id)
+                    from core.documents import ai_generate_document
+                    result = await ai_generate_document(doc_type, text, text)
+                    if "error" not in result:
+                        caption = f"🕋 {result['title']}\n{doc_type.upper()} — Auto Makah"
+                        await send_document(chat_id, result["path"], caption)
+                        await send_telegram_message(chat_id, f"✅ تم إنشاء {doc_type.upper()}")
+                        return JSONResponse({"status": "document"})
+                    break
 
         await asyncio.ensure_future(send_typing(chat_id))
         reply = await process_message(chat_id, user_id, text, first_name)
