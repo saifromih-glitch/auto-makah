@@ -195,18 +195,18 @@ async def trigger_loop(loop_id: str):
     return JSONResponse(result)
 
 # ═══ 📚 Skill Files — Lopp Step 7 ═══
-@app.get("/api/skills")
+@app.get("/api/agent-skills")
 async def list_skill_files():
-    """List all reusable skill files."""
+    """List all reusable Lopp skill files (.skill format)."""
     try:
         from core.skill_loader import list_skills
         return JSONResponse({"skills": list_skills()})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-@app.get("/api/skills/{name}")
+@app.get("/api/agent-skills/{name}")
 async def get_skill(name: str):
-    """Load a specific skill file."""
+    """Load a specific Lopp skill file."""
     from core.skill_loader import load_skill
     content = load_skill(name)
     if not content:
