@@ -639,7 +639,7 @@ body {
     </button>
     <div class="model-badge">
       <span class="dot"></span>
-      <span id="current-model">GLM-5.2 + Kimi K2.7</span>
+      <span id="current-model">GLM-5.2 + Kimi K2.6</span>
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="refreshStatus()" title="Refresh">🔄</button>
@@ -925,7 +925,7 @@ async function fetchHealth() {
         🛠️ ${data.tools || 31} أداة<br>
         📦 v${data.version || '0.4.0'}
       `;
-      document.getElementById('current-model').textContent = 'GLM-5.2 + Kimi K2.7';
+      document.getElementById('current-model').textContent = 'GLM-5.2 + Kimi K2.6';
     }
   } catch(e) {
     document.getElementById('status-panel').innerHTML = '🔴 API غير متصل';
