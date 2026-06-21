@@ -315,3 +315,24 @@ async def debt_status():
             "deadline": d.review_deadline,
         } for d in debt[-10:]]  # Last 10 entries
     })
+
+# ═══ 🔍 Self-Verification Engine ═══
+@app.get("/api/verify")
+async def verify_all():
+    """Verify all Auto Makah pages — mobile, responsive, RTL, errors."""
+    from core.verifier import verify_all_pages
+    return JSONResponse(verify_all_pages())
+
+@app.get("/api/verify/{page:path}")
+async def verify_single_page(page: str):
+    """Verify a single page by path."""
+    from core.verifier import verify_page
+    report = verify_page("/" + page)
+    return JSONResponse(report.to_dict())
+
+@app.get("/api/self-test")
+async def self_test():
+    """Quick 3-second self-test — plain text report."""
+    from core.verifier import quick_self_test
+    result = quick_self_test()
+    return Response(result, media_type="text/plain; charset=utf-8")
