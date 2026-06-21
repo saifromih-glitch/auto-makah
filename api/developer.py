@@ -180,10 +180,56 @@ async def chat_completions(req: ChatCompletionRequest, request: Request):
     # Record usage
     APIKeyManager.record_usage(api_key, resp.tokens_in + resp.tokens_out)
 
-    # OpenAI-compatible response format
     created = int(time.time())
+    chat_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
+
+    # ─── Streaming (SSE) ───
+    if req.stream:
+        async def generate_sse():
+            # Simulate streaming by sending response word-by-word
+            text = resp.text if resp.ok else "Error: " + (resp.error or "unknown")
+            words = text.split()
+            for i, word in enumerate(words):
+                chunk = {
+                    "id": chat_id,
+                    "object": "chat.completion.chunk",
+                    "created": created,
+                    "model": req.model,
+                    "choices": [{
+                        "index": 0,
+                        "delta": {"content": word + " "},
+                        "finish_reason": None,
+                    }],
+                }
+                yield f"data: {json.dumps(chunk)}\n\n"
+                import asyncio
+                await asyncio.sleep(0.03)  # Natural typing speed
+            
+            # Final chunk
+            final = {
+                "id": chat_id,
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": req.model,
+                "choices": [{
+                    "index": 0,
+                    "delta": {},
+                    "finish_reason": "stop",
+                }],
+                "usage": {
+                    "prompt_tokens": resp.tokens_in,
+                    "completion_tokens": resp.tokens_out,
+                    "total_tokens": resp.tokens_in + resp.tokens_out,
+                },
+            }
+            yield f"data: {json.dumps(final)}\n\n"
+            yield "data: [DONE]\n\n"
+        
+        return StreamingResponse(generate_sse(), media_type="text/event-stream")
+
+    # ─── Standard (JSON) ───
     return JSONResponse({
-        "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
+        "id": chat_id,
         "object": "chat.completion",
         "created": created,
         "model": req.model,
