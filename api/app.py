@@ -103,18 +103,32 @@ async def health():
 
 @app.get("/api/tools")
 async def list_tools(category: str = None):
-    """List all registered tools."""
+    """List all registered tools including Kimi tools."""
     from core.tools import registry
-    if category:
-        return JSONResponse(registry.list_by_category(category))
-    return JSONResponse(registry.list_all())
+    from core.kimi_tools import KIMI_TOOLS
+    tools = registry.list_all() if not category else registry.list_by_category(category)
+    # Add Kimi tools
+    kimi = [{"name": t["name"], "display": t["display"], "desc": t["description"], "category": "kimi"} for t in KIMI_TOOLS.values()]
+    return JSONResponse({"tools": tools + kimi, "count": len(tools) + len(kimi)})
 
 
 @app.get("/api/agents")
 async def list_agents():
-    """List all registered agents."""
+    """List all registered agents + template agents."""
     from core.agent import runtime
-    return JSONResponse(runtime.list_agents())
+    agents = runtime.list_agents()
+    if not agents:
+        agents = [
+            {"id": "azmi", "name": "استراتيجي", "icon": "🧭", "role": "Porter · 5 Forces", "status": "ready"},
+            {"id": "analyst", "name": "محلل مالي", "icon": "💰", "role": "Damodaran · DCF/WACC", "status": "ready"},
+            {"id": "ops", "name": "مهندس تشغيلي", "icon": "⚙️", "role": "Goldratt · TOC", "status": "ready"},
+            {"id": "legal", "name": "مستشار قانوني", "icon": "⚖️", "role": "Susskind · LegalTech", "status": "ready"},
+            {"id": "growth", "name": "خبير نمو", "icon": "📈", "role": "Ellis · AARRR", "status": "ready"},
+            {"id": "data", "name": "عالم بيانات", "icon": "📊", "role": "Patil · Data Jujitsu", "status": "ready"},
+            {"id": "tech", "name": "مهندس برمجيات", "icon": "💻", "role": "Fowler · CI/CD", "status": "ready"},
+            {"id": "hr", "name": "مستشار HR", "icon": "👥", "role": "Bock · People Analytics", "status": "ready"},
+        ]
+    return JSONResponse({"agents": agents, "count": len(agents)})
 
 
 # Import route modules
