@@ -225,3 +225,83 @@ async def brv_status():
         "success_rate": round((state.successful_runs / max(state.total_runs, 1)) * 100, 1),
         "last_error": state.last_error,
     })
+
+# ═══ 🌳 Worktree Isolation — Lopp Step 6 ═══
+@app.get("/api/worktrees")
+async def worktree_status():
+    """List all agent workspaces."""
+    from core.worktree import get_worktree_manager
+    mgr = get_worktree_manager()
+    return JSONResponse({"workspaces": mgr.get_all_snapshots(), "count": len(mgr.workspaces)})
+
+@app.get("/api/worktrees/{agent_id}")
+async def agent_workspace(agent_id: str):
+    """Get workspace files for a specific agent."""
+    from core.worktree import get_worktree_manager
+    mgr = get_worktree_manager()
+    ws = mgr.get_workspace(agent_id)
+    return JSONResponse({"agent_id": agent_id, "files": ws.list_files()})
+
+@app.get("/api/worktrees/{agent_a}/diff/{agent_b}")
+async def worktree_diff(agent_a: str, agent_b: str):
+    """Compare files between two agent workspaces."""
+    from core.worktree import get_worktree_manager
+    mgr = get_worktree_manager()
+    return JSONResponse(mgr.check_conflicts(agent_a, agent_b))
+
+# ═══ 🛡️ Controlled Autonomy — Lopp Step 14 ═══
+@app.get("/api/autonomy")
+async def autonomy_status():
+    """Get autonomy gate status — pending approvals."""
+    from core.autonomy_gate import get_autonomy_gate
+    gate = get_autonomy_gate()
+    return JSONResponse(gate.get_stats())
+
+@app.post("/api/autonomy/request")
+async def request_approval(action: str = None, requested_by: str = "system"):
+    """Request human approval for a critical action."""
+    from core.autonomy_gate import get_autonomy_gate
+    if not action:
+        return JSONResponse({"error": "action parameter required"}, status_code=400)
+    gate = get_autonomy_gate()
+    check = gate.needs_approval(action)
+    if not check["needs_approval"]:
+        return JSONResponse({"auto_approved": True, **check})
+    approval_id = gate.request_approval(action, requested_by)
+    return JSONResponse({"needs_approval": True, "approval_id": approval_id, **check})
+
+@app.post("/api/autonomy/{approval_id}/approve")
+async def approve_action(approval_id: str, approved_by: str = "admin"):
+    """Approve a pending action."""
+    from core.autonomy_gate import get_autonomy_gate
+    gate = get_autonomy_gate()
+    ok = gate.approve(approval_id, approved_by)
+    return JSONResponse({"approved": ok, "approval_id": approval_id})
+
+@app.post("/api/autonomy/{approval_id}/deny")
+async def deny_action(approval_id: str, denied_by: str = "admin", reason: str = ""):
+    """Deny a pending action."""
+    from core.autonomy_gate import get_autonomy_gate
+    gate = get_autonomy_gate()
+    ok = gate.deny(approval_id, denied_by, reason)
+    return JSONResponse({"denied": ok, "approval_id": approval_id})
+
+# ═══ 💳 Comprehension Debt — Lopp Step 13 ═══
+@app.get("/api/debt")
+async def debt_status():
+    """Get comprehension debt tracker status."""
+    from core.loop_engineering import get_comprehension_debt
+    debt = get_comprehension_debt("auto_makah")
+    unpaid = [d for d in debt if not hasattr(d, 'understood') or not d.understood]
+    return JSONResponse({
+        "total_debt": len(debt),
+        "unpaid": len(unpaid),
+        "entries": [{
+            "timestamp": d.timestamp,
+            "file": d.file_path,
+            "description": d.change_description,
+            "understood": d.understood,
+            "risk": d.risk_level,
+            "deadline": d.review_deadline,
+        } for d in debt[-10:]]  # Last 10 entries
+    })
