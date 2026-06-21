@@ -14,6 +14,7 @@ class ChatRequest(BaseModel):
     session_id: str = "web_default"
     agent: str | None = None
     tool: str | None = None
+    high_quality: bool = False  # 🏗️ Use BRV Pipeline (Builder/Reviewer/Verifier)
 
 
 @router.post("/chat")
@@ -44,7 +45,18 @@ async def chat_endpoint(req: ChatRequest):
 
         if req.agent:
             system += f"\nأنت الآن خبير في مجال: {req.agent}"
+        else:
+            # 📚 Auto-inject best skill based on question
+            try:
+                from core.skill_loader import inject_best_skill
+                system = inject_best_skill(system, req.message)
+            except Exception:
+                pass
 
+        # 🏗️ High Quality Mode: Builder/Reviewer/Verifier pipeline
+        if req.high_quality:
+            return await _handle_brv_chat(req)
+        
         resp = await router.call(req.message, system_prompt=system)
         reply = resp.text if resp.ok else "عذراً، النماذج مشغولة — حاول بعد لحظات."
         
@@ -169,6 +181,46 @@ async def _handle_rethink(req: ChatRequest):
         })
     except Exception as e:
         return JSONResponse({"reply": f"❌ فشل تنظيم الأفكار: {e}", "error": str(e)}, status_code=500)
+
+
+# ═══ 🏗️ Builder/Reviewer/Verifier — High Quality Chat ═══
+
+async def _handle_brv_chat(req: ChatRequest):
+    """Lopp Step 9: 3-agent verification pipeline for high-quality responses."""
+    from core.brv_pipeline import BRVPipeline
+    from core.loop_engineering import load_state, save_state
+    
+    loop_state = load_state("brv_chat", "auto_makah")
+    
+    pipeline = BRVPipeline()
+    result = await pipeline.process_with_retry(req.message)
+    
+    # Save state
+    loop_state.total_runs += 1
+    if result.passed:
+        loop_state.successful_runs += 1
+    else:
+        loop_state.failed_runs += 1
+        loop_state.last_error = f"Score: {result.score}/10"
+    save_state(loop_state)
+    
+    return JSONResponse({
+        "reply": result.builder_output,
+        "model": f"BRV Pipeline ({result.model_used})",
+        "brv": {
+            "passed": result.passed,
+            "score": result.score,
+            "reviewer_notes": result.reviewer_output[:300],
+            "verdict": result.verifier_output[:200],
+            "improvements": result.improvements[:3],
+            "pipeline_ms": 0,  # Would track real latency
+        },
+        "guard": _verify_reply_quality(result.builder_output, req.message),
+        "loop_state": {
+            "total": loop_state.total_runs,
+            "success_rate": round((loop_state.successful_runs / max(loop_state.total_runs, 1)) * 100, 1)
+        }
+    })
 
 
 # ═══ 🔁 Loop Engineering: False Completion Guard ═══

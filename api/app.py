@@ -193,3 +193,35 @@ async def trigger_loop(loop_id: str):
     orch = apply_to_auto_makah()
     result = orch.run_loop(loop_id, lambda: {"status": "manual_trigger"})
     return JSONResponse(result)
+
+# ═══ 📚 Skill Files — Lopp Step 7 ═══
+@app.get("/api/skills")
+async def list_skill_files():
+    """List all reusable skill files."""
+    try:
+        from core.skill_loader import list_skills
+        return JSONResponse({"skills": list_skills()})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.get("/api/skills/{name}")
+async def get_skill(name: str):
+    """Load a specific skill file."""
+    from core.skill_loader import load_skill
+    content = load_skill(name)
+    if not content:
+        return JSONResponse({"error": "skill not found"}, status_code=404)
+    return JSONResponse({"name": name, "content": content})
+
+# ═══ 🏗️ BRV Pipeline Status ═══
+@app.get("/api/brv/status")
+async def brv_status():
+    """Builder/Reviewer/Verifier pipeline health."""
+    from core.loop_engineering import load_state
+    state = load_state("brv_chat", "auto_makah")
+    return JSONResponse({
+        "pipeline": "Builder → Reviewer → Verifier",
+        "total_runs": state.total_runs,
+        "success_rate": round((state.successful_runs / max(state.total_runs, 1)) * 100, 1),
+        "last_error": state.last_error,
+    })
