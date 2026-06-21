@@ -135,12 +135,13 @@ app.include_router(developer.router, tags=["developer-platform"])
 app.include_router(desktop_routes.router, tags=["desktop-agent"])
 app.include_router(parity_routes.router, tags=["parity-tools"])
 
-# ═══ 404 Error Page ═══
-@app.exception_handler(404)
-async def not_found_handler(request, exc):
+# ═══ 404 Catch-All — must be LAST ═══
+@app.get("/{path:path}")
+async def catch_all(path: str):
+    """Catch-all for 404 — serves 404 page or returns 404."""
     base = os.path.dirname(os.path.dirname(__file__))
-    path = os.path.join(base, "dashboard", "404.html")
-    if os.path.isfile(path):
-        with open(path, "r", encoding="utf-8") as f:
+    error_path = os.path.join(base, "dashboard", "404.html")
+    if os.path.isfile(error_path):
+        with open(error_path, "r", encoding="utf-8") as f:
             return HTMLResponse(f.read(), status_code=404)
     return HTMLResponse("<h1>٤٠٤ — الصفحة غير موجودة 🕋</h1>", status_code=404)
