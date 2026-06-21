@@ -153,3 +153,30 @@ app.include_router(chat.router, tags=["chat"])
 app.include_router(developer.router, tags=["developer-platform"])
 app.include_router(desktop_routes.router, tags=["desktop-agent"])
 app.include_router(parity_routes.router, tags=["parity-tools"])
+
+# ═══ 🔁 Loop Engineering — Auto Makah ═══
+@app.get("/api/loops")
+async def loops_health():
+    """Loop Engineering health dashboard — all project loops."""
+    try:
+        from core.loop_engineering import apply_to_auto_makah
+        orch = apply_to_auto_makah()
+        return JSONResponse(orch.get_project_health())
+    except Exception as e:
+        return JSONResponse({"error": str(e), "status": "loop_engine_not_ready"}, status_code=500)
+
+@app.get("/api/loops/{loop_id}")
+async def loop_state(loop_id: str):
+    """Get state for a specific loop."""
+    from core.loop_engineering import load_state, apply_to_auto_makah
+    orch = apply_to_auto_makah()
+    state = load_state(loop_id, orch.project)
+    return JSONResponse(state.to_dict())
+
+@app.post("/api/loops/{loop_id}/run")
+async def trigger_loop(loop_id: str):
+    """Manually trigger a loop."""
+    from core.loop_engineering import apply_to_auto_makah
+    orch = apply_to_auto_makah()
+    result = orch.run_loop(loop_id, lambda: {"status": "manual_trigger"})
+    return JSONResponse(result)
