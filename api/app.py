@@ -63,6 +63,16 @@ async def kimi_ui():
     return HTMLResponse("<h1>Kimi UI not found</h1>", status_code=404)
 
 
+@app.get("/skills", response_class=HTMLResponse)
+async def skills_store():
+    """Skill Store — professional AI skills marketplace."""
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard", "skills-store.html")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Skill Store not found</h1>", status_code=404)
+
+
 @app.get("/robots.txt")
 async def robots():
     base = os.path.dirname(os.path.dirname(__file__))

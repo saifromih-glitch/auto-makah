@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 مهارات Auto Makah — Skill Store</title>
+<meta name="description" content="حمل مهارات AI احترافية للمستشار الاستراتيجي والمحلل المالي والمهندس التشغيلي. تشتغل على OpenClaw وClaude Code وCursor.">
+<meta property="og:title" content="📚 مهارات Auto Makah — Skill Store">
+<meta property="og:description" content="حمل مهارات AI احترافية — تشتغل على 5 منصات">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0a0f14 0%,#0d1f1a 50%,#0a0f14 100%);color:#e8e4db;font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;direction:rtl}
+
+header{position:relative;z-index:1;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,160,23,.15)}
+.logo a{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;text-decoration:none;color:#e8e4db}
+.logo span{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav a{color:#8a8578;text-decoration:none;margin:0 12px;font-size:14px;transition:color .2s}
+.nav a:hover{color:#d4a017}
+
+.hero{position:relative;z-index:1;text-align:center;padding:80px 20px 40px}
+.hero h1{font-size:clamp(24px,4vw,42px);font-weight:700;margin-bottom:12px}
+.hero h1 .gold{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#8a8578;max-width:600px;margin:0 auto;line-height:1.7}
+
+.skills-grid{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.skill-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,160,23,0.15);border-radius:16px;padding:28px;transition:all .3s}
+.skill-card:hover{border-color:rgba(212,160,23,0.35);transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,160,23,0.08)}
+.skill-icon{font-size:40px;margin-bottom:16px}
+.skill-card h3{font-size:20px;margin-bottom:8px}
+.skill-meta{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-ver{background:rgba(212,160,23,0.15);color:#d4a017}
+.badge-free{background:rgba(46,160,67,0.15);color:#2ea043}
+.badge-multi{background:rgba(88,140,234,0.15);color:#588cea}
+
+.skill-desc{color:#8a8578;font-size:14px;line-height:1.7;margin-bottom:20px}
+.skill-features{list-style:none;margin-bottom:20px}
+.skill-features li{padding:6px 0;font-size:13px;color:#a8a398;border-bottom:1px solid rgba(255,255,255,0.05)}
+.skill-features li:before{content:'✅ ';margin-left:6px}
+
+.platforms{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.platform-badge{padding:4px 10px;border-radius:6px;font-size:11px;background:rgba(255,255,255,0.05);color:#a8a398}
+
+.install-section{background:rgba(0,0,0,0.3);border-radius:8px;padding:16px;margin-bottom:16px}
+.install-tabs{display:flex;gap:4px;margin-bottom:12px}
+.install-tab{padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#8a8578;transition:all .2s}
+.install-tab.active{background:rgba(212,160,23,0.15);border-color:rgba(212,160,23,0.3);color:#d4a017}
+.install-code{background:#000;border-radius:6px;padding:12px;font-family:'Cascadia Code','Fira Code',monospace;font-size:12px;color:#2ea043;overflow-x:auto;white-space:pre-wrap;direction:ltr;text-align:left;display:none}
+.install-code.active{display:block}
+.copy-btn{float:right;background:rgba(212,160,23,0.15);color:#d4a017;border:1px solid rgba(212,160,23,0.3);padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .2s}
+.copy-btn:hover{background:rgba(212,160,23,0.25)}
+.copy-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2ea043;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:100;opacity:0;transition:opacity .3s}
+.copy-toast.show{opacity:1}
+
+.bottom-cta{position:relative;z-index:1;text-align:center;padding:60px 20px}
+.bottom-cta h2{font-size:24px;margin-bottom:16px}
+.bottom-cta .gold{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:inline-block;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:600;transition:all .2s;font-size:15px}
+.btn-primary{background:linear-gradient(135deg,#d4a017,#c89210);color:#0a0f14}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,160,23,0.25)}
+.btn-outline{padding:12px 24px;background:transparent;border:1px solid rgba(212,160,23,0.3);color:#d4a017;font-size:13px}
+
+footer{position:relative;z-index:1;text-align:center;padding:32px;border-top:1px solid rgba(212,160,23,.1);color:#5a5550;font-size:12px}
+.loading{text-align:center;padding:60px;color:#8a8578;font-size:18px}
+.error-card{background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);color:#ff6b6b;padding:24px;border-radius:12px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><a href="/">🕋 <span>Auto Makah</span> — Skill Store</a></div>
+  <nav class="nav">
+    <a href="/">الرئيسية</a>
+    <a href="/kimi">المنصة</a>
+    <a href="/skills" style="color:#d4a017">المهارات</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>📚 <span class="gold">مهارات AI احترافية</span></h1>
+  <p>حمّل مهارات ذكاء اصطناعي جاهزة — تشتغل على ٥ منصات. من OpenClaw إلى Cursor. كل مهارة = منهجية خبير حقيقي + Rules + Pipeline</p>
+</section>
+
+<main class="skills-grid" id="skills-container">
+  <div class="loading">⏳ جاري تحميل المهارات...</div>
+</main>
+
+<section class="bottom-cta">
+  <h2>عندك <span class="gold">مهارة</span> عاوز تضيفها؟</h2>
+  <p style="color:#8a8578;margin-bottom:24px">ارفع SKILL.md على GitHub — واحنا نضيفها للمتجر</p>
+  <a href="https://github.com/saifromih-glitch/auto-makah" class="btn btn-primary">📦 أضف مهارة على GitHub</a>
+</section>
+
+<footer>
+  🕋 Auto Makah — v0.4.0 — Skills compatible with OpenClaw, Claude Code, Cursor, Windsurf
+</footer>
+
+<div class="copy-toast" id="toast">✅ تم النسخ!</div>
+
+<script>
+const SKILLS_API = '/api/agent-skills';
+
+const PLATFORM_COMMANDS = {
+  'openclaw': 'mkdir -p ~/.openclaw/skills\ncd ~/.openclaw/skills\ngit clone https://github.com/saifromih-glitch/auto-makah.git\ncp -r auto-makah/skills/SKILL_NAME .\necho "✅ Skill installed"',
+  'claude-code': 'mkdir -p .claude/skills\ncd .claude/skills\ngit clone https://github.com/saifromih-glitch/auto-makah.git\ncp -r auto-makah/skills/SKILL_NAME .\necho "✅ Skill installed"',
+  'cursor': 'mkdir -p .cursor/rules\ncd .cursor/rules\ngit clone https://github.com/saifromih-glitch/auto-makah.git\ncp -r auto-makah/skills/SKILL_NAME .\necho "✅ Skill installed"',
+  'windsurf': 'mkdir -p .windsurf/skills\ncd .windsurf/skills\ngit clone https://github.com/saifromih-glitch/auto-makah.git\ncp -r auto-makah/skills/SKILL_NAME .\necho "✅ Skill installed"',
+  'auto-makah': 'curl -X POST https://auto-makah.fly.dev/api/chat/chat \\\n  -H "Content-Type: application/json" \\\n  -d \'{"message":"استشر خبير SKILL_NAME","session_id":"skill_test"}\''
+};
+
+const PLATFORM_NAMES = {
+  'openclaw': 'OpenClaw', 'claude-code': 'Claude Code',
+  'cursor': 'Cursor', 'windsurf': 'Windsurf', 'auto-makah': 'Auto Makah'
+};
+
+async function loadSkills() {
+  const container = document.getElementById('skills-container');
+  try {
+    const resp = await fetch(SKILLS_API);
+    const data = await resp.json();
+    if (!data.skills || data.skills.length === 0) {
+      container.innerHTML = '<div class="error-card">⚠️ لا توجد مهارات حالياً — جاري بناء المتجر</div>';
+      return;
+    }
+    renderSkills(data.skills);
+  } catch(e) {
+    container.innerHTML = '<div class="error-card">⚠️ تعذر تحميل المهارات — <a href="/api/agent-skills" style="color:#d4a017">افتح API مباشرة</a></div>';
+  }
+}
+
+function renderSkills(skills) {
+  const container = document.getElementById('skills-container');
+  container.innerHTML = skills.map((s, i) => {
+    const platforms = ['openclaw','claude-code','cursor','windsurf','auto-makah'];
+    const installId = `install-${s.name}`;
+    
+    const features = getFeatures(s.name);
+    
+    return `
+    <div class="skill-card">
+      <div class="skill-icon">${s.display.split(' ')[0]}</div>
+      <h3>${s.display}</h3>
+      <div class="skill-meta">
+        <span class="badge badge-ver">v${s.version}</span>
+        <span class="badge badge-free">مجاني</span>
+        <span class="badge badge-multi">${platforms.length} منصات</span>
+      </div>
+      <p class="skill-desc">${s.methodology}</p>
+      <ul class="skill-features">
+        ${features.map(f => `<li>${f}</li>`).join('')}
+      </ul>
+      <div class="platforms">
+        ${platforms.map(p => `<span class="platform-badge">✅ ${PLATFORM_NAMES[p]}</span>`).join('')}
+      </div>
+      <div class="install-section">
+        <div class="install-tabs">
+          ${platforms.map(p => 
+            `<button class="install-tab${p==='openclaw'?' active':''}" onclick="showInstall('${installId}','${p}')">${PLATFORM_NAMES[p]}</button>`
+          ).join('')}
+        </div>
+        ${platforms.map(p => {
+          const cmd = PLATFORM_COMMANDS[p].replace(/SKILL_NAME/g, s.name);
+          return `<pre class="install-code${p==='openclaw'?' active':''}" id="${installId}-${p}"><button class="copy-btn" onclick="copyCode('${installId}-${p}')">📋 نسخ</button>${cmd}</pre>`;
+        }).join('')}
+      </div>
+      <a href="/api/agent-skills/${s.name}" class="btn-outline" style="display:inline-block;text-decoration:none">📄 عرض SKILL.md كاملة</a>
+    </div>`;
+  }).join('');
+}
+
+function getFeatures(name) {
+  const map = {
+    'strategy': ['Five Forces تحليل تنافسي', 'Value Chain رسم سلسلة القيمة', 'رؤية 2030 دعم السوق السعودي', 'Fast Path (٣ دقائق) + Standard Path', 'مراجع: دليل القوى الخمس + ملخص الأطر'],
+    'finance': ['DCF نموذج تدفقات نقدية مخصومة', 'WACC حساب تكلفة رأس المال', 'Risk Premium للسوق السعودي 5.5-6.5%', 'تحليل حساسية Best/Worst Case', '٢٠ نسبة مالية رئيسية'],
+    'operations': ['TOC تحديد عنق الزجاجة', 'Drum-Buffer-Rope مزامنة الإنتاج', '5 Whys تحليل الأسباب الجذرية', 'Lean + Six Sigma أدوات', 'خطة تحسين مستمر'],
+  };
+  return map[name] || ['استشارة احترافية', 'منهجية علمية', 'خطوات عملية قابلة للتنفيذ'];
+}
+
+function showInstall(baseId, platform) {
+  document.querySelectorAll(`[id^="${baseId}-"]`).forEach(el => el.classList.remove('active'));
+  document.getElementById(`${baseId}-${platform}`).classList.add('active');
+  document.querySelectorAll(`#install-section .install-tab`).forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const text = el.textContent.replace('📋 نسخ', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+loadSkills();
+</script>
+</body>
+</html>
