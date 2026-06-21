@@ -147,6 +147,16 @@ def _detect_document_request(text: str) -> dict | None:
                     topic = text
                 return {"type": doc_type, "topic": topic or text}
     
+    # ─── Loose match: any mention of document types ───
+    if any(w in text_norm for w in ["اكسل", "excel", "xls", "جدول", "spreadsheet"]):
+        return {"type": "xlsx", "topic": text}
+    if any(w in text_norm for w in ["وورد", "word", "doc", "مستند"]):
+        return {"type": "docx", "topic": text}
+    if any(w in text_norm for w in ["بوربوينت", "عرض تقديمي", "powerpoint", "ppt", "سلايد", "شرايح"]):
+        return {"type": "pptx", "topic": text}
+    if any(w in text_norm for w in ["pdf", "بي دي اف"]):
+        return {"type": "pdf", "topic": text}
+    
     return None
 
 
