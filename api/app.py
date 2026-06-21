@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse, Response
 import os
 
 app = FastAPI(
@@ -22,6 +22,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Security headers middleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:"
+        return response
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Rate limiting
 from api.middleware import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
@@ -34,7 +47,25 @@ async def kimi_ui():
     if os.path.isfile(path):
         with open(path, "r", encoding="utf-8") as f:
             return HTMLResponse(f.read())
-    return HTMLResponse("<h1>Kimi UI not found</h1>")
+    return HTMLResponse("<h1>Kimi UI not found</h1>", status_code=404)
+
+
+@app.get("/robots.txt")
+async def robots():
+    base = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(base, "dashboard", "robots.txt")
+    if os.path.isfile(path):
+        return FileResponse(path)
+    return Response("User-agent: *\nAllow: /\n", media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+async def sitemap():
+    base = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(base, "dashboard", "sitemap.xml")
+    if os.path.isfile(path):
+        return FileResponse(path)
+    return Response("", status_code=404)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -103,3 +134,13 @@ app.include_router(chat.router, tags=["chat"])
 app.include_router(developer.router, tags=["developer-platform"])
 app.include_router(desktop_routes.router, tags=["desktop-agent"])
 app.include_router(parity_routes.router, tags=["parity-tools"])
+
+# ═══ 404 Error Page ═══
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    base = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(base, "dashboard", "404.html")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read(), status_code=404)
+    return HTMLResponse("<h1>٤٠٤ — الصفحة غير موجودة 🕋</h1>", status_code=404)
