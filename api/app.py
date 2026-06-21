@@ -106,10 +106,15 @@ async def list_tools(category: str = None):
     """List all registered tools including Kimi tools."""
     from core.tools import registry
     from core.kimi_tools import KIMI_TOOLS
-    tools = registry.list_all() if not category else registry.list_by_category(category)
+    reg_tools = registry.list_all() if not category else registry.list_by_category(category)
+    # Convert registry dict to list
+    if isinstance(reg_tools, dict):
+        tool_list = [{"name": k, **v} for k, v in reg_tools.items()]
+    else:
+        tool_list = reg_tools
     # Add Kimi tools
-    kimi = [{"name": t["name"], "display": t["display"], "desc": t["description"], "category": "kimi"} for t in KIMI_TOOLS.values()]
-    return JSONResponse({"tools": tools + kimi, "count": len(tools) + len(kimi)})
+    kimi_list = [{"name": t["name"], "display": t["display"], "desc": t["description"], "category": "kimi"} for t in KIMI_TOOLS.values()]
+    return JSONResponse({"tools": tool_list + kimi_list, "count": len(tool_list) + len(kimi_list)})
 
 
 @app.get("/api/agents")
