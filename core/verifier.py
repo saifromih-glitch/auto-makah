@@ -59,17 +59,43 @@ class PageReport:
 
 
 def fetch_page(path: str) -> tuple:
-    """Fetch a page and return (status, html, time_ms)."""
+    """Fetch a page by reading from disk (avoids recursive HTTP call)."""
     import time
-    url = BASE_URL + path
     start = time.time()
+    
+    # Map paths to files
+    file_map = {
+        "/": "landing.html",
+        "/kimi": "kimi-ui.html",
+        "/skills": "skills-store.html",
+    }
+    
+    if path in file_map:
+        base = os.path.dirname(os.path.dirname(__file__))
+        filepath = os.path.join(base, "dashboard", file_map[path])
+    elif path.endswith(".html") or path.endswith(".txt"):
+        base = os.path.dirname(os.path.dirname(__file__))
+        filepath = os.path.join(base, "dashboard", os.path.basename(path))
+    else:
+        # API endpoint — try HTTP (won't deadlock for small JSON)
+        try:
+            url = BASE_URL + path
+            r = urllib.request.urlopen(url, timeout=5)
+            html = r.read().decode('utf-8')
+            elapsed = int((time.time() - start) * 1000)
+            return r.status, html, elapsed
+        except Exception:
+            return 0, "", int((time.time() - start) * 1000)
+    
     try:
-        r = urllib.request.urlopen(url, timeout=10)
-        html = r.read().decode('utf-8')
-        elapsed = int((time.time() - start) * 1000)
-        return r.status, html, elapsed
+        if os.path.isfile(filepath):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                html = f.read()
+            elapsed = int((time.time() - start) * 1000)
+            return 200, html, elapsed
+        return 404, "", int((time.time() - start) * 1000)
     except Exception as e:
-        return 0, str(e), int((time.time() - start) * 1000)
+        return 500, str(e), int((time.time() - start) * 1000)
 
 
 def verify_page(path: str) -> PageReport:
