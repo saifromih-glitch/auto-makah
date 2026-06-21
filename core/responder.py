@@ -71,12 +71,23 @@ class IntelligentResponder:
 • لا تذكر عيادة الشركات أو Doctor Companies"""
 
     async def respond(self, message: str, user_id: str, session_id: str) -> str:
-        """Smart response: simple or expert-based."""
+        """Smart response: simple or expert-based — with memory injection."""
+        
+        # Inject memory context
+        try:
+            memory_context = injector.inject(message, user_id, session_id)
+        except Exception:
+            memory_context = ""
         
         if self._needs_experts(message):
-            system = self.IDENTITY + "\n\nالمهمة: قدم تحليلاً عميقاً واحترافياً.\nاستخدم هيكل: ١. التحليل ٢. التوصيات ٣. الخطوات العملية.\nأجب بالعربية الفصحى مباشرة — بدون مقدمات."
+            system = self.IDENTITY
+            if memory_context:
+                system += f"\n\n[ذاكرة المستخدم]\n{memory_context}"
+            system += "\n\nالمهمة: قدم تحليلاً عميقاً واحترافياً.\nاستخدم هيكل: ١. التحليل ٢. التوصيات ٣. الخطوات العملية.\nأجب بالعربية الفصحى مباشرة — بدون مقدمات."
         else:
             system = self.IDENTITY
+            if memory_context:
+                system += f"\n\n[ذاكرة المستخدم]\n{memory_context}"
 
         resp = await self.router.call(message, system_prompt=system, max_tokens=2000)
         if resp.ok and resp.text:

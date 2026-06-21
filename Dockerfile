@@ -31,4 +31,13 @@ RUN git init && \
 
 EXPOSE 8000
 
-CMD ["python", "main.py"]
+# Start script: configure flyctl auth from secret, then run app
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'if [ -n "$FLY_API_TOKEN" ]; then' >> /start.sh && \
+    echo '  export FLY_ACCESS_TOKEN="$FLY_API_TOKEN"' >> /start.sh && \
+    echo '  echo "Flyctl auth configured"' >> /start.sh && \
+    echo 'fi' >> /start.sh && \
+    echo 'exec python main.py' >> /start.sh && \
+    chmod +x /start.sh
+
+CMD ["/start.sh"]

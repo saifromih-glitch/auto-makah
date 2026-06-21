@@ -111,6 +111,12 @@ async def process_message(chat_id: int, user_id: int, text: str, first_name: str
     session_id = f"tg_{chat_id}"
     user_id_str = str(user_id)
 
+    # Save user name as fact
+    if first_name:
+        memory.save_fact(user_id_str, "name", first_name)
+        memory.save_fact(user_id_str, "chat_id", str(chat_id))
+    
+    # Save user message to short-term memory
     memory.remember(session_id, "user", text)
 
     # Use Intelligent Responder (auto-routes to experts or simple)
