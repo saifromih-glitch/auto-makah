@@ -30,9 +30,10 @@ async def chat_endpoint(req: ChatRequest):
         
         # ═══ LLM CHAT (with agent context if specified) ═══
         from core.connectors import HybridRouter
+        from core.cognitive_protocol import COGNITIVE_PROTOCOL
 
         router = HybridRouter()
-        system = "أنت Auto Makah — منصة عربية هجينة (OpenClaw × Kimi). أجب بدقة واحترافية بالعربية."
+        system = COGNITIVE_PROTOCOL + "\nأنت Auto Makah — منصة عربية هجينة (OpenClaw × Kimi). أجب بدقة واحترافية بالعربية."
 
         if req.agent:
             system += f"\nأنت الآن خبير في مجال: {req.agent}"
