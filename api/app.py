@@ -355,3 +355,43 @@ async def heal_notify():
     """Full cycle: Verify → Heal → Notify Mohammed."""
     from core.verifier import heal_and_notify
     return JSONResponse(heal_and_notify())
+
+# ═══ 🕷️ Web Scraper ═══
+@app.post("/api/scrape")
+async def scrape_url_api(url: str = None, export: str = "json"):
+    """Scrape any URL — extract tables, lists, text, metadata."""
+    if not url:
+        return JSONResponse({"error": "url parameter required"}, status_code=400)
+    
+    from core.scraper import scrape_url, export_to_csv, export_to_json
+    
+    result = scrape_url(url)
+    
+    if export == "csv":
+        csv_data = export_to_csv(result)
+        return Response(csv_data, media_type="text/csv; charset=utf-8")
+    
+    return JSONResponse(result.to_dict())
+
+@app.post("/api/scrape/summarize")
+async def scrape_summary(url: str = None):
+    """Scrape a URL and return AI-friendly summary."""
+    if not url:
+        return JSONResponse({"error": "url parameter required"}, status_code=400)
+    from core.scraper import scrape_and_summarize
+    return JSONResponse(scrape_and_summarize(url))
+
+@app.post("/api/scrape/schedule")
+async def schedule_scrape_api(url: str = None, name: str = None, interval_hours: int = 24):
+    """Schedule periodic scraping of a URL."""
+    if not url or not name:
+        return JSONResponse({"error": "url and name required"}, status_code=400)
+    from core.scraper import schedule_scrape
+    sid = schedule_scrape(url, name, interval_hours)
+    return JSONResponse({"scheduled": True, "schedule_id": sid})
+
+@app.get("/api/scrape/schedules")
+async def list_schedules_api():
+    """List all scheduled scrapes."""
+    from core.scraper import list_schedules
+    return JSONResponse({"schedules": list_schedules()})
