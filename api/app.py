@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse, Response
 import os
+from datetime import datetime
 
 app = FastAPI(
     title="Auto Makah",
@@ -483,3 +484,66 @@ async def os_web_fetch(url: str = None):
     from core.agent_os import web_fetch
     result = web_fetch(url)
     return JSONResponse(result.to_dict())
+
+# ═══════════════════════════════════════════
+# 📄 Document Generation (XLSX · DOCX · PPTX · PDF)
+# ═══════════════════════════════════════════
+
+from pydantic import BaseModel
+
+class DocGenRequest(BaseModel):
+    type: str  # xlsx, docx, pptx, pdf
+    topic: str
+    detail: str = ""
+
+@app.post("/api/documents/generate")
+async def generate_document(req: DocGenRequest):
+    """AI-powered document generation. Returns downloadable file."""
+    from core.documents import ai_generate_document
+    
+    if req.type not in ("xlsx", "docx", "pptx", "pdf"):
+        return JSONResponse({"error": f"Invalid type: {req.type}. Use: xlsx, docx, pptx, pdf"}, status_code=400)
+    
+    result = await ai_generate_document(req.type, req.topic, req.detail)
+    
+    if "error" in result:
+        return JSONResponse(result, status_code=500)
+    
+    # Return file
+    path = result["path"]
+    if not os.path.isfile(path):
+        return JSONResponse({"error": "File not found after generation"}, status_code=500)
+    
+    media_types = {
+        "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "pdf": "text/html; charset=utf-8",
+    }
+    
+    return FileResponse(
+        path,
+        media_type=media_types.get(req.type, "application/octet-stream"),
+        filename=result["filename"],
+        headers={"X-Document-Title": result.get("title", req.topic)}
+    )
+
+@app.get("/api/documents/list")
+async def list_documents():
+    """List all generated documents."""
+    from pathlib import Path
+    out_dir = Path(__file__).parent.parent / "output"
+    if not out_dir.exists():
+        return JSONResponse({"documents": []})
+    
+    files = []
+    for f in sorted(out_dir.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+        if f.suffix in (".xlsx", ".docx", ".pptx", ".html"):
+            files.append({
+                "filename": f.name,
+                "type": f.suffix[1:],
+                "size_kb": round(f.stat().st_size / 1024, 1),
+                "modified": datetime.fromtimestamp(f.stat().st_mtime).isoformat(),
+            })
+    
+    return JSONResponse({"documents": files[:20]})

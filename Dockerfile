@@ -21,7 +21,7 @@ RUN uv pip install --system --no-cache -r requirements.txt
 COPY . .
 
 # Create workspace with write permissions
-RUN mkdir -p /app/workspace && chmod -R 777 /app/workspace
+RUN mkdir -p /app/workspace /app/output && chmod -R 777 /app/workspace /app/output
 
 # Git init for self-modification
 RUN git init && \
