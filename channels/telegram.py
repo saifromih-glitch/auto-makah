@@ -113,8 +113,8 @@ def _detect_document_request(text: str) -> dict | None:
     
     # Normalize Arabic: remove diacritics, unify alef/hamza/yeh
     arabic_norm = str.maketrans(
-        "إأآؤئىة",  # from
-        "ااااوييه"  # to
+        "إأآؤئىة",  # from (7 chars)
+        "اااوييه"  # to   (7 chars)
     )
     text_norm = text_lower.translate(arabic_norm)
     
