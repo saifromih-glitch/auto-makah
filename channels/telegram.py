@@ -93,6 +93,44 @@ async def send_typing(chat_id: int):
         })
 
 
+async def send_document(chat_id: int, file_path: str, caption: str = ""):
+    """Send a file to Telegram chat."""
+    if not TOKEN or not os.path.exists(file_path):
+        return None
+    async with httpx.AsyncClient(timeout=30) as client:
+        with open(file_path, "rb") as f:
+            resp = await client.post(
+                f"{BASE_URL}/sendDocument",
+                data={"chat_id": chat_id, "caption": caption[:1024]},
+                files={"document": (os.path.basename(file_path), f)}
+            )
+        return resp.json()
+
+
+def _detect_document_request(text: str) -> dict | None:
+    """Detect if user is asking for a document. Returns {type, topic} or None."""
+    text_lower = text.lower()
+    
+    doc_patterns = {
+        "xlsx": ["ملف اكسل", "excel", "xlsx", "جدول بيانات", "جدول اكسل", "spreadsheet", "اعمل لي جدول", "سوي لي جدول"],
+        "docx": ["ملف وورد", "word", "docx", "تقرير وورد", "مستند", "اعمل لي تقرير", "سوي لي تقرير"],
+        "pptx": ["عرض تقديمي", "بوربوينت", "powerpoint", "pptx", "شرائح", "سلايدات", "presentation", "اعمل لي عرض", "سوي لي عرض"],
+        "pdf": ["pdf", "بي دي اف", "ملف pdf", "تقرير pdf", "احفظ كـ pdf"],
+    }
+    
+    for doc_type, keywords in doc_patterns.items():
+        for kw in keywords:
+            if kw in text_lower:
+                # Extract topic — everything before/after the keyword
+                topic = text_lower.replace(kw, "").strip()
+                if not topic:
+                    # Ask the model what it's about
+                    topic = text
+                return {"type": doc_type, "topic": text.replace(kw, "").strip() or text}
+    
+    return None
+
+
 def _deduplicate(text: str) -> str:
     lines = text.strip().split("\n")
     seen = set()
@@ -301,6 +339,21 @@ async def telegram_webhook(req: Request):
   أو اختر تخصصاً أعلاه."""
             await send_telegram_message(chat_id, welcome)
             return JSONResponse({"status": "start"})
+
+        # ─── Document Generation ───
+        doc_req = _detect_document_request(text)
+        if doc_req:
+            await send_typing(chat_id)
+            from core.documents import ai_generate_document
+            result = await ai_generate_document(doc_req["type"], doc_req["topic"], text)
+            if "error" not in result:
+                caption = f"🕋 {result['title']}\n{result['type'].upper()} — Auto Makah"
+                await send_document(chat_id, result["path"], caption)
+                await send_telegram_message(chat_id, f"✅ تم إنشاء {result['type'].upper()} — {result['filename']}")
+                return JSONResponse({"status": "document"})
+            else:
+                await send_telegram_message(chat_id, f"⚠️ تعذر إنشاء الملف: {result['error']}")
+                return JSONResponse({"status": "document_error"})
 
         await asyncio.ensure_future(send_typing(chat_id))
         reply = await process_message(chat_id, user_id, text, first_name)
