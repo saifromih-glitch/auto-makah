@@ -37,10 +37,16 @@ def generate_xlsx(title: str, headers: list, rows: list, sheet_name: str = "Shee
         for c, val in enumerate(row, 1):
             ws.cell(row=r, column=c, value=val).alignment = Alignment(horizontal="center")
 
-    # Column widths (skip merged cells)
-    for col_cells in ws.columns:
-        max_len = max((len(str(cell.value or "")) for cell in col_cells if not isinstance(cell, type(ws['A1'])) and cell.value), default=8)
-        col_letter = col_cells[0].column_letter if col_cells else 'A'
+    # Column widths
+    from openpyxl.utils import get_column_letter
+    from openpyxl.cell.cell import MergedCell
+    for col_idx in range(1, len(headers) + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 8
+        for row in range(1, len(rows) + 5):
+            cell = ws[f"{col_letter}{row}"]
+            if not isinstance(cell, MergedCell) and cell.value:
+                max_len = max(max_len, len(str(cell.value)))
         ws.column_dimensions[col_letter].width = min(max_len + 4, 40)
 
     path = _save_file(title, ".xlsx")
