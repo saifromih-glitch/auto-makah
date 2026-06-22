@@ -546,3 +546,30 @@ async def list_documents():
             })
     
     return JSONResponse({"documents": files[:20]})
+
+# ═══ Consultant Agent ═══
+
+@app.post("/api/consult")
+async def api_consult(req: dict):
+    """Business consulting with 5 frameworks."""
+    from core.consultant import consult
+    result = await consult(
+        topic=req.get("topic", ""),
+        framework=req.get("framework", "swot"),
+        context=req.get("context", ""),
+    )
+    return JSONResponse(result)
+
+@app.post("/api/strategy/{framework}")
+async def api_strategy(framework: str, req: dict):
+    """Strategic analysis: hedgehog, blue_ocean"""
+    from core import consultant
+    company = req.get("company", "")
+    context = req.get("context", "")
+    if framework == "hedgehog":
+        r = await consultant.hedgehog(company, context)
+    elif framework == "blue_ocean":
+        r = await consultant.blue_ocean(company, context)
+    else:
+        r = {"error": f"Unknown framework: {framework}"}
+    return JSONResponse(r)
