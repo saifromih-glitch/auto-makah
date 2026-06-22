@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕋 Auto Makah — منصة الوكلاء</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0a0f14 0%,#0d1f1a 50%,#0a0f14 100%);color:#e8e4db;font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh}
+header{padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,160,23,.15);background:rgba(10,15,20,.95);position:sticky;top:0;z-index:10}
+.logo{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.logo span{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#8a8578}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:60px 0 32px}
+.hero h1{font-size:clamp(24px,4vw,40px);margin-bottom:8px}
+.hero p{color:#8a8578;font-size:15px}
+.gold{background:linear-gradient(135deg,#d4a017,#f0c740);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.categories{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px}
+.cat-btn{background:rgba(17,24,32,.8);border:1px solid rgba(30,42,53,.5);color:#8a8578;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s}
+.cat-btn:hover,.cat-btn.active{background:rgba(212,160,23,.15);border-color:#d4a017;color:#d4a017}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:rgba(17,24,32,.9);border:1px solid rgba(30,42,53,.5);border-radius:16px;padding:24px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+.card:hover{border-color:#d4a017;transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,160,23,.1)}
+.card-icon{font-size:32px;margin-bottom:12px}
+.card-name{font-size:17px;font-weight:600;margin-bottom:4px;color:#f0c740}
+.card-endpoint{font-size:11px;color:#8a8578;margin-bottom:12px;font-family:monospace}
+.card-desc{font-size:13px;color:#8a8578;line-height:1.6}
+.card-badge{position:absolute;top:12px;left:12px;font-size:10px;padding:3px 8px;border-radius:10px;background:rgba(34,197,94,.2);color:#22c55e}
+.card-badge.ai{background:rgba(59,130,246,.2);color:#3b82f6}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:100;justify-content:center;align-items:center;padding:20px}
+.modal.active{display:flex}
+.modal-box{background:rgba(17,24,32,.98);border:1px solid rgba(212,160,23,.2);border-radius:16px;padding:32px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto}
+.modal-box h3{font-size:20px;margin-bottom:8px;color:#f0c740}
+.modal-box .endpoint{font-size:12px;color:#8a8578;margin-bottom:16px;font-family:monospace}
+.modal-box label{display:block;font-size:13px;color:#8a8578;margin-bottom:4px}
+.modal-box input,.modal-box textarea{width:100%;background:rgba(30,42,53,.5);border:1px solid rgba(30,42,53,.8);color:#e8e4db;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:12px;resize:vertical}
+.modal-box textarea{min-height:100px}
+.modal-box button{background:linear-gradient(135deg,#d4a017,#b8860b);color:#0a0f14;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
+.modal-box button:hover{filter:brightness(1.1)}
+.modal-box button:disabled{opacity:.5;cursor:not-allowed}
+.result{background:rgba(30,42,53,.5);border:1px solid rgba(30,42,53,.8);border-radius:8px;padding:16px;margin-top:16px;font-size:14px;line-height:1.8;white-space:pre-wrap;display:none;max-height:400px;overflow-y:auto}
+.result.show{display:block}
+.close-modal{position:absolute;top:16px;right:16px;background:none;border:none;color:#8a8578;font-size:24px;cursor:pointer;width:auto}
+footer{text-align:center;padding:40px;color:#8a8578;font-size:12px;border-top:1px solid rgba(30,42,53,.3);margin-top:40px}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo"><span>🕋 Auto Makah</span></div>
+<div class="status"><div class="status-dot"></div>AI نشط</div>
+</header>
+
+<div class="container">
+<div class="hero">
+<h1><span class="gold">وكلاء AI</span> للعالم العربي</h1>
+<p>اختر وكيلاً — اكتب سؤالك — احصل على إجابة فورية</p>
+</div>
+
+<div class="categories" id="cats"></div>
+<div class="grid" id="grid"></div>
+</div>
+
+<footer>Auto Makah © 2026 — منصة عربية للذكاء الاصطناعي | جميع الحقوق محفوظة</footer>
+
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
+
+<script>
+const BASE = '';
+
+const AGENTS = [
+  {cat:'استشارات وأعمال', icon:'📊', name:'SWOT Analysis', ep:'POST /api/consult', body:{topic:'',framework:'swot'}, desc:'تحليل SWOT/Porter/PESTEL/BMC للشركات والأسواق — بتقارير عربية احترافية', ai:true},
+  {cat:'استشارات وأعمال', icon:'🎯', name:'Hedgehog Strategy', ep:'POST /api/strategy/hedgehog', body:{company:'',context:'السوق السعودي'}, desc:'مفهوم القنفذ لجيم كولينز — اكتشف شغفك وتميزك ومحركك الاقتصادي', ai:true},
+  {cat:'استشارات وأعمال', icon:'📋', name:'مقارنة', ep:'POST /api/compare', body:{items:'',criteria:'التكلفة،الجودة'}, desc:'قارن منتجات/شركات/خدمات — جدول مقارنة + توصية + ترتيب', ai:true},
+  {cat:'استشارات وأعمال', icon:'📋', name:'دراسة جدوى', ep:'POST /api/feasibility', body:{idea:'',budget:''}, desc:'دراسة جدوى كاملة — سوق + فنية + مالية + مخاطر + توصية', ai:true},
+  {cat:'مالية واستثمار', icon:'💰', name:'تقييم شركات', ep:'POST /api/valuation', body:{company:'',industry:'عام'}, desc:'تقييم DCF + WACC + Risk Premium — قيمة عادلة وسيناريوهات', ai:true},
+  {cat:'مالية واستثمار', icon:'📈', name:'تحليل استثماري', ep:'POST /api/invest', body:{opportunity:'',budget:''}, desc:'NPV + IRR + فترة استرداد + تحليل حساسية', ai:true},
+  {cat:'موارد بشرية', icon:'👥', name:'وصف وظيفي', ep:'POST /api/hr/job-description', body:{role:'',industry:'',level:'متوسط'}, desc:'توصيف وظيفي احترافي للسوق السعودي', ai:true},
+  {cat:'موارد بشرية', icon:'🎤', name:'أسئلة مقابلة', ep:'POST /api/hr/interview', body:{role:'',focus:'تقني وسلوكي'}, desc:'أسئلة تقنية + سلوكية + ذكاء عاطفي مع نماذج إجابات', ai:true},
+  {cat:'موارد بشرية', icon:'📝', name:'تقييم أداء', ep:'POST /api/hr/evaluate', body:{role:'',performance:''}, desc:'تقييم موظف — نقاط قوة + تحسين + خطة تطوير', ai:true},
+  {cat:'موارد بشرية', icon:'📄', name:'تحليل CV', ep:'POST /api/hr/cv', body:{cv:''}, desc:'حلل السيرة الذاتية واكتشف نقاط القوة والضعف', ai:true},
+  {cat:'هندسة', icon:'⚙️', name:'تصميم هيدروليكي', ep:'POST /api/engineering/hydraulic', body:{specs:''}, desc:'حسابات الضغط والتدفق — اختيار المضخة والصمامات — BOM', ai:true},
+  {cat:'هندسة', icon:'🔩', name:'تصميم ميكانيكي', ep:'POST /api/engineering/mechanical', body:{part:''}, desc:'أبعاد + مواد + إجهادات + تفاوتات + طريقة تصنيع', ai:true},
+  {cat:'هندسة', icon:'📐', name:'SolidWorks', ep:'POST /api/engineering/solidworks', body:{task:''}, desc:'خطوات SolidWorks بالتفصيل — أوامر + نصائح احترافية', ai:true},
+  {cat:'هندسة', icon:'📋', name:'تحليل BOM', ep:'POST /api/engineering/bom', body:{assembly:''}, desc:'قائمة مواد كاملة — تكاليف + مهل + بدائل + تحسينات', ai:true},
+  {cat:'تسويق', icon:'📢', name:'AARRR Metrics', ep:'POST /api/marketing/aarrr', body:{product:''}, desc:'تحليل اكتساب/تفعيل/احتفاظ/إحالة/إيراد — منهجية Sean Ellis', ai:true},
+  {cat:'تسويق', icon:'📅', name:'خطة تسويقية', ep:'POST /api/marketing/plan', body:{product:'',budget:'',audience:''}, desc:'خطة ٩٠ يوم — قنوات + KPIs + ميزانية', ai:true},
+  {cat:'تسويق', icon:'🎨', name:'حملة إعلانية', ep:'POST /api/marketing/campaign', body:{product:'',channel:'تيك توك'}, desc:'اسم الحملة + فكرة + محتوى + خطة نشر', ai:true},
+  {cat:'أدوات إسلامية', icon:'🧮', name:'حاسبة الزكاة', ep:'POST /api/zakat', body:{wealth:'',gold_price:'300',debts:'0'}, desc:'حساب الزكاة فوراً — النصاب والمبلغ المستحق', ai:false},
+  {cat:'أدوات إسلامية', icon:'📜', name:'المواريث', ep:'POST /api/inheritance', body:{total:'',heirs:''}, desc:'تقسيم التركة حسب الشريعة الإسلامية (استشر عالماً)', ai:false},
+  {cat:'أدوات عامة', icon:'💱', name:'تحويل عملات', ep:'POST /api/currency', body:{amount:'',from:'SAR',to:'USD'}, desc:'SAR ⇄ USD ⇄ EUR — سعر الصرف المباشر', ai:false},
+  {cat:'أدوات عامة', icon:'📏', name:'تحويل وحدات', ep:'POST /api/units', body:{value:'',conversion:'km_to_miles'}, desc:'km⇄miles, kg⇄lbs, °C⇄°F, L⇄gal', ai:false},
+  {cat:'أدوات عامة', icon:'✉️', name:'بريد إلكتروني', ep:'POST /api/email', body:{purpose:'',tone:'رسمي',recipient:''}, desc:'اكتب بريداً احترافياً — عنوان + تحية + متن + توقيع', ai:true},
+  {cat:'أدوات عامة', icon:'🌐', name:'ترجمة', ep:'POST /api/translate', body:{text:'',from:'ar',to:'en'}, desc:'ترجمة احترافية عربي ↔ إنجليزي مع مراعاة السياق', ai:true},
+  {cat:'تحليل وتطوير', icon:'⚖️', name:'قانوني سعودي', ep:'POST /api/legal', body:{question:'',domain:'labor'}, desc:'بحث + تحليل قانوني — العمل/الشركات/التجاري/الزكاة', ai:true},
+  {cat:'تحليل وتطوير', icon:'🏗️', name:'خطة مشروع', ep:'POST /api/project-plan', body:{goal:'',constraints:''}, desc:'مراحل + مهام + جدول + موارد + مخاطر', ai:true},
+  {cat:'تحليل وتطوير', icon:'🏥', name:'طبي', ep:'POST /api/medical/surgery-guide', body:{surgery:''}, desc:'إرشادات ما بعد العملية — رعاية + أدوية + علامات خطر', ai:true},
+  {cat:'تحليل وتطوير', icon:'📱', name:'منشور اجتماعي', ep:'POST /api/social', body:{topic:'',platform:'twitter',tone:'احترافي'}, desc:'منشور محسن لكل منصة — نص + هاشتاقات + CTA', ai:true},
+  {cat:'تحليل وتطوير', icon:'📅', name:'تقويم محتوى', ep:'POST /api/content-calendar', body:{business:'',days:'7'}, desc:'جدول نشر أسبوعي — كل يوم + منصة + موضوع', ai:true},
+];
+
+const cats = [...new Set(AGENTS.map(a=>a.cat))];
+let activeCat = 'all';
+
+document.getElementById('cats').innerHTML = 
+  '<button class="cat-btn active" onclick="filter(\'all\')">الكل ('+AGENTS.length+')</button>' +
+  cats.map(c=>`<button class="cat-btn" onclick="filter('${c}')">${c}</button>`).join('');
+
+function filter(cat){
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function render(){
+  const filtered = activeCat==='all' ? AGENTS : AGENTS.filter(a=>a.cat===activeCat);
+  document.getElementById('grid').innerHTML = filtered.map(a=>`
+    <div class="card" onclick="openAgent('${a.name}')">
+      ${a.ai ? '<div class="card-badge ai">AI</div>' : '<div class="card-badge">سريع</div>'}
+      <div class="card-icon">${a.icon}</div>
+      <div class="card-name">${a.name}</div>
+      <div class="card-endpoint">${a.ep}</div>
+      <div class="card-desc">${a.desc}</div>
+    </div>
+  `).join('');
+}
+
+function openAgent(name){
+  const agent = AGENTS.find(a=>a.name===name);
+  if(!agent) return;
+  const body = agent.body;
+  const fields = Object.keys(body).map(k=>{
+    const label = k==='topic'?'الموضوع':k==='items'?'العناصر':k==='company'?'الشركة':
+      k==='industry'?'القطاع':k==='goal'?'الهدف':k==='idea'?'الفكرة':
+      k==='question'?'السؤال':k==='budget'?'الميزانية':k==='role'?'الوظيفة':
+      k==='cv'?'نص السيرة':k==='specs'?'المواصفات':k==='part'?'القطعة':
+      k==='task'?'المهمة':k==='assembly'?'التجميعة':k==='product'?'المنتج':
+      k==='opportunity'?'الفرصة':k==='text'?'النص':k==='purpose'?'الغرض':
+      k==='performance'?'الأداء':k==='surgery'?'العملية':k==='business'?'النشاط':
+      k==='wealth'?'المبلغ':k==='amount'?'القيمة':k==='value'?'القيمة':
+      k==='total'?'المجموع':k==='heirs'?'الورثة':k;
+    const placeholder = k==='items'?'منتج ١، منتج ٢، منتج ٣':'...';
+    const type = k==='cv'||k==='text'||k==='heirs'||k==='items'||k==='specs'||k==='performance'?'textarea':'input';
+    return `<label>${label}</label>${type==='textarea'
+      ?`<textarea id="f_${k}" placeholder="${placeholder}">${body[k]}</textarea>`
+      :`<input id="f_${k}" value="${body[k]}" placeholder="${placeholder}">`}`;
+  }).join('');
+
+  document.getElementById('modalBox').innerHTML = `
+    <button class="close-modal" onclick="closeModal()">✕</button>
+    <h3>${agent.icon} ${agent.name}</h3>
+    <div class="endpoint">${agent.ep}</div>
+    ${fields}
+    <button id="runBtn" onclick="runAgent('${name}')">▶ تشغيل</button>
+    <div class="result" id="result"></div>
+  `;
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+
+document.getElementById('modal').onclick = function(e){if(e.target===this)closeModal()}
+
+async function runAgent(name){
+  const a = AGENTS.find(x=>x.name===name);
+  if(!a) return;
+  const btn = document.getElementById('runBtn');
+  const res = document.getElementById('result');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري التحليل...';
+  res.classList.remove('show');
+  res.textContent = '';
+
+  const body = {};
+  for(const k of Object.keys(a.body)){
+    const el = document.getElementById('f_'+k);
+    body[k] = el ? el.value : a.body[k];
+  }
+
+  try{
+    const method = a.ep.startsWith('GET') ? 'GET' : 'POST';
+    const r = await fetch(BASE + a.ep.replace(/^(GET|POST) /,''), {
+      method,
+      headers:{'Content-Type':'application/json'},
+      body: method==='POST' ? JSON.stringify(body) : undefined
+    });
+    const data = await r.json();
+    const content = data.analysis || data.research || data.evaluation ||
+      data.job_description || data.questions || data.guide || data.content ||
+      data.translation || data.localized || data.email || data.post ||
+      data.calendar || data.verdict || JSON.stringify(data,null,2);
+    res.textContent = typeof content === 'string' ? content : JSON.stringify(content,null,2);
+  }catch(e){
+    res.textContent = '⚠️ خطأ: ' + e.message + '\n\nتأكد من اتصال المنصة';
+  }
+  res.classList.add('show');
+  res.scrollIntoView({behavior:'smooth'});
+  btn.disabled = false;
+  btn.textContent = '▶ تشغيل';
+}
+
+render();
+</script>
+</body>
+</html>
