@@ -648,3 +648,26 @@ async def api_create_content(req: dict):
         audience=req.get("audience", "عام"),
     )
     return JSONResponse(result)
+
+# ═══ Finance Agent ═══
+
+@app.post("/api/valuation")
+async def api_valuation(req: dict):
+    """Business valuation — DCF, WACC, fair value. Body: {company, industry}"""
+    from core.finance import business_valuation
+    result = await business_valuation(company_desc=req.get("company", ""), industry=req.get("industry", "عام"))
+    return JSONResponse(result)
+
+@app.post("/api/invest")
+async def api_invest(req: dict):
+    """Investment analysis — NPV, IRR. Body: {opportunity, budget}"""
+    from core.finance import investment_analysis
+    result = await investment_analysis(opportunity=req.get("opportunity", ""), budget=req.get("budget", ""))
+    return JSONResponse(result)
+
+@app.post("/api/feasibility")
+async def api_feasibility(req: dict):
+    """Feasibility study. Body: {idea, budget}"""
+    from core.finance import feasibility_study
+    result = await feasibility_study(idea=req.get("idea", ""), budget=req.get("budget", ""))
+    return JSONResponse(result)
