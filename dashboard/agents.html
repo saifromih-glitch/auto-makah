@@ -100,6 +100,12 @@ const AGENTS = [
   {cat:'تحليل وتطوير', icon:'🏥', name:'طبي', ep:'POST /api/medical/surgery-guide', body:{surgery:''}, desc:'إرشادات ما بعد العملية — رعاية + أدوية + علامات خطر', ai:true},
   {cat:'تحليل وتطوير', icon:'📱', name:'منشور اجتماعي', ep:'POST /api/social', body:{topic:'',platform:'twitter',tone:'احترافي'}, desc:'منشور محسن لكل منصة — نص + هاشتاقات + CTA', ai:true},
   {cat:'تحليل وتطوير', icon:'📅', name:'تقويم محتوى', ep:'POST /api/content-calendar', body:{business:'',days:'7'}, desc:'جدول نشر أسبوعي — كل يوم + منصة + موضوع', ai:true},
+  {cat:'🔥 متقدم', icon:'🚀', name:'Pipeline - إطلاق مشروع', ep:'POST /api/pipeline/business_launch', body:{input:''}, desc:'4 خطوات: جدوى → SWOT → خطة → تحليل مالي — متسلسلة تلقائياً', ai:true},
+  {cat:'🔥 متقدم', icon:'🏢', name:'Pipeline - تحليل شركة', ep:'POST /api/pipeline/company_analysis', body:{input:''}, desc:'SWOT → Porter → تقييم → توصيات — 4 وكلاء متسلسلين', ai:true},
+  {cat:'🔥 متقدم', icon:'📢', name:'Pipeline - حملة تسويقية', ep:'POST /api/pipeline/content_marketing', body:{input:''}, desc:'AARRR → خطة → محتوى → تقويم — حملة كاملة بضغطة واحدة', ai:true},
+  {cat:'🔥 متقدم', icon:'💡', name:'عصف ذهني', ep:'POST /api/brainstorm', body:{topic:'',method:'scamper'}, desc:'١٠ أفكار مبتكرة — SCAMPER / Six Hats / First Principles', ai:true},
+  {cat:'🔥 متقدم', icon:'📋', name:'ملخص تنفيذي', ep:'POST /api/executive-summary', body:{topic:'',length:'موجز'}, desc:'ملخص C-Level — فقرة واحدة مباشرة', ai:true},
+  {cat:'🔥 متقدم', icon:'🎤', name:'Pitch Deck', ep:'POST /api/pitch-deck', body:{company:'',audience:'مستثمرين'}, desc:'١٢ شريحة عرض — جاهزة للمستثمرين', ai:true},
 ];
 
 const cats = [...new Set(AGENTS.map(a=>a.cat))];

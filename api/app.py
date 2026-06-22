@@ -846,3 +846,34 @@ async def api_calendar(req: dict):
     from core.more_agents import content_calendar
     result = await content_calendar(business=req.get("business", ""), days=req.get("days", 7))
     return JSONResponse(result)
+
+# ═══ Advanced Features ═══
+
+@app.get("/api/pipelines")
+async def api_pipelines():
+    from core.advanced import PIPELINES
+    return JSONResponse({"pipelines": {k: {"name": v["name"], "steps": len(v["steps"])} for k, v in PIPELINES.items()}})
+
+@app.post("/api/pipeline/{name}")
+async def api_run_pipeline(name: str, req: dict):
+    from core.advanced import run_pipeline
+    result = await run_pipeline(pipeline_name=name, input_text=req.get("input", ""))
+    return JSONResponse(result)
+
+@app.post("/api/brainstorm")
+async def api_brainstorm(req: dict):
+    from core.advanced import brainstorm
+    result = await brainstorm(topic=req.get("topic", ""), method=req.get("method", "scamper"))
+    return JSONResponse(result)
+
+@app.post("/api/executive-summary")
+async def api_exec_summary(req: dict):
+    from core.advanced import executive_summary
+    result = await executive_summary(topic=req.get("topic", ""), length=req.get("length", "موجز"))
+    return JSONResponse(result)
+
+@app.post("/api/pitch-deck")
+async def api_pitch_deck(req: dict):
+    from core.advanced import pitch_deck
+    result = await pitch_deck(company=req.get("company", ""), audience=req.get("audience", "مستثمرين"))
+    return JSONResponse(result)
