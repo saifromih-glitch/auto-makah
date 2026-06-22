@@ -607,3 +607,44 @@ async def api_legal(req: dict):
         domain=req.get("domain", "labor"),
     )
     return JSONResponse(result)
+
+# ═══ Multi-Tool Agents ═══
+
+@app.post("/api/compare")
+async def api_compare(req: dict):
+    """Compare items. Body: {items: [...], criteria: [...]}"""
+    from core.tools_agents import compare
+    result = await compare(items=req.get("items", []), criteria=req.get("criteria"))
+    return JSONResponse(result)
+
+@app.post("/api/analyze-data")
+async def api_analyze_data(req: dict):
+    """Analyze data. Body: {data: "..."}"""
+    from core.tools_agents import analyze_data
+    result = await analyze_data(data_description=req.get("data", ""))
+    return JSONResponse(result)
+
+@app.post("/api/meeting-notes")
+async def api_meeting_notes(req: dict):
+    """Meeting summary. Body: {transcript: "..."}"""
+    from core.tools_agents import meeting_notes
+    result = await meeting_notes(transcript=req.get("transcript", ""))
+    return JSONResponse(result)
+
+@app.post("/api/project-plan")
+async def api_project_plan(req: dict):
+    """Project plan. Body: {goal: "...", constraints: "..."}"""
+    from core.tools_agents import project_plan
+    result = await project_plan(goal=req.get("goal", ""), constraints=req.get("constraints", ""))
+    return JSONResponse(result)
+
+@app.post("/api/create-content")
+async def api_create_content(req: dict):
+    """Content generation. Body: {topic: "...", format: "blog", audience: "..."}"""
+    from core.tools_agents import create_content
+    result = await create_content(
+        topic=req.get("topic", ""),
+        format=req.get("format", "blog"),
+        audience=req.get("audience", "عام"),
+    )
+    return JSONResponse(result)
