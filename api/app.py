@@ -587,7 +587,11 @@ async def api_evolve_code():
 async def api_evolve_workspace():
     """Analyze workspace config files for redundancy and stale data."""
     from core.evolver import analyze_config_files
+    # On Fly.io, use /app; locally use workspace
     base = os.path.dirname(os.path.dirname(__file__))
     workspace = os.path.dirname(base)
+    # If workspace doesn't have config files, use the project root
+    if not os.path.exists(os.path.join(workspace, "AGENTS.md")):
+        workspace = base
     result = await analyze_config_files(workspace)
     return JSONResponse(result)
