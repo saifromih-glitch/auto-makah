@@ -759,3 +759,29 @@ async def api_password(req: dict):
     from core.utilities import generate_password
     result = generate_password(length=req.get("length", 16), include_symbols=req.get("symbols", True))
     return JSONResponse(result)
+
+# ═══ HR Agent ═══
+
+@app.post("/api/hr/job-description")
+async def api_jd(req: dict):
+    from core.hr import job_description
+    result = await job_description(role=req.get("role", ""), industry=req.get("industry", ""), level=req.get("level", "متوسط"))
+    return JSONResponse(result)
+
+@app.post("/api/hr/interview")
+async def api_interview(req: dict):
+    from core.hr import interview_questions
+    result = await interview_questions(role=req.get("role", ""), focus=req.get("focus", "تقني وسلوكي"))
+    return JSONResponse(result)
+
+@app.post("/api/hr/evaluate")
+async def api_evaluate(req: dict):
+    from core.hr import employee_evaluation
+    result = await employee_evaluation(role=req.get("role", ""), performance=req.get("performance", ""))
+    return JSONResponse(result)
+
+@app.post("/api/hr/cv")
+async def api_cv(req: dict):
+    from core.hr import cv_analyzer
+    result = await cv_analyzer(cv_text=req.get("cv", ""))
+    return JSONResponse(result)
