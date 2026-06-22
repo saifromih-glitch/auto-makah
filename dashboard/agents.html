@@ -58,6 +58,7 @@ footer{text-align:center;padding:40px;color:#8a8578;font-size:12px;border-top:1p
 <div class="hero">
 <h1><span class="gold">وكلاء AI</span> للعالم العربي</h1>
 <p>اختر وكيلاً — اكتب سؤالك — احصل على إجابة فورية</p>
+<p style="font-size:13px;color:#8a8578;margin-top:8px">⚠️ الـ AI Agents تستخدم ZenMux (نموذج مجاني). قد تحتاج <a href="https://zenmux.ai/pricing" style="color:#d4a017" target="_blank">ترقية ZenMux</a> للاستخدام الكثيف. الأدوات الإسلامية والعملات بدون AI شغالة ٢٤/٧.</p>
 </div>
 
 <div class="categories" id="cats"></div>
@@ -203,6 +204,9 @@ async function runAgent(name){
   }catch(e){
     res.textContent = '⚠️ خطأ: ' + e.message + '\n\nتأكد من اتصال المنصة';
   }
+  // Handle rate limits gracefully
+  if(typeof content === 'string' && content.includes('429') && content.includes('rate_limit')){
+    res.textContent = '⚠️ وصلنا للحد المجاني اليومي من ZenMux\n\nالوكلاء اللي بدون AI (الأدوات الإسلامية، تحويل العملات، الوحدات، كلمة المرور) شغالين بدون مشاكل.\n\nالوكلاء الـ AI هيرجعوا يشتغلوا تلقائياً خلال ساعات.\n\nللاستخدام المستمر بدون حدود: سجل في ZenMux Pro.';
   res.classList.add('show');
   res.scrollIntoView({behavior:'smooth'});
   btn.disabled = false;
