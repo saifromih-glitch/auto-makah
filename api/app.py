@@ -106,6 +106,16 @@ async def landing_page():
     return RedirectResponse(url="/kimi")
 
 
+@app.get("/dashboard/agents.html", response_class=HTMLResponse)
+async def agents_dashboard():
+    base = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(base, "dashboard", "agents.html")
+    if os.path.isfile(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    return HTMLResponse("<h1>Agents Dashboard not found</h1>", status_code=404)
+
+
 @app.get("/api/health")
 async def health():
     """Health check endpoint."""
