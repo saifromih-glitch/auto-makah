@@ -909,3 +909,39 @@ async def api_text_stats(req: dict):
     from core.search_export import text_stats
     result = text_stats(text=req.get("text", ""))
     return JSONResponse(result)
+
+# ═══ Global Platform Features ═══
+
+@app.post("/api/auth/key")
+async def api_create_key(req: dict):
+    """Generate API key. Body: {name: "app-name"}"""
+    from core.platform import generate_api_key
+    result = generate_api_key(name=req.get("name", "default"))
+    return JSONResponse(result)
+
+@app.get("/api/auth/keys")
+async def api_list_keys():
+    from core.platform import list_api_keys
+    return JSONResponse({"keys": list_api_keys()})
+
+@app.post("/api/stream")
+async def api_stream(req: dict):
+    """Stream AI response in real-time. Body: {prompt, system}"""
+    from core.platform import stream_ai_response
+    return StreamingResponse(
+        stream_ai_response(prompt=req.get("prompt", ""), system=req.get("system", "")),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"}
+    )
+
+@app.post("/api/embed")
+async def api_embed(req: dict):
+    """Generate embed code. Body: {agent: "/api/consult", theme: "dark"}"""
+    from core.platform import generate_embed_script
+    script = generate_embed_script(agent_endpoint=req.get("agent", "/api/consult"), theme=req.get("theme", "dark"))
+    return JSONResponse({"embed_code": script, "usage": "Copy this code into any HTML page"})
+
+@app.get("/api/platform")
+async def api_platform():
+    from core.platform import platform_stats
+    return JSONResponse(platform_stats())
