@@ -671,3 +671,49 @@ async def api_feasibility(req: dict):
     from core.finance import feasibility_study
     result = await feasibility_study(idea=req.get("idea", ""), budget=req.get("budget", ""))
     return JSONResponse(result)
+
+# ═══ Engineering Agent ═══
+
+@app.post("/api/engineering/hydraulic")
+async def api_hydraulic(req: dict):
+    from core.engineering import hydraulic_design
+    result = await hydraulic_design(specs=req.get("specs", ""))
+    return JSONResponse(result)
+
+@app.post("/api/engineering/mechanical")
+async def api_mechanical(req: dict):
+    from core.engineering import mechanical_design
+    result = await mechanical_design(part_desc=req.get("part", ""))
+    return JSONResponse(result)
+
+@app.post("/api/engineering/bom")
+async def api_bom(req: dict):
+    from core.engineering import bom_analysis
+    result = await bom_analysis(assembly=req.get("assembly", ""))
+    return JSONResponse(result)
+
+@app.post("/api/engineering/solidworks")
+async def api_solidworks(req: dict):
+    from core.engineering import solidworks_howto
+    result = await solidworks_howto(task=req.get("task", ""))
+    return JSONResponse(result)
+
+# ═══ Marketing Agent ═══
+
+@app.post("/api/marketing/aarrr")
+async def api_aarrr(req: dict):
+    from core.marketing import aarrr_analysis
+    result = await aarrr_analysis(product=req.get("product", ""))
+    return JSONResponse(result)
+
+@app.post("/api/marketing/plan")
+async def api_marketing_plan(req: dict):
+    from core.marketing import marketing_plan
+    result = await marketing_plan(product=req.get("product", ""), budget=req.get("budget", ""), audience=req.get("audience", ""))
+    return JSONResponse(result)
+
+@app.post("/api/marketing/campaign")
+async def api_campaign(req: dict):
+    from core.marketing import campaign_idea
+    result = await campaign_idea(product=req.get("product", ""), channel=req.get("channel", "منصات التواصل"))
+    return JSONResponse(result)
