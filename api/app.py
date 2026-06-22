@@ -573,3 +573,21 @@ async def api_strategy(framework: str, req: dict):
     else:
         r = {"error": f"Unknown framework: {framework}"}
     return JSONResponse(r)
+
+# ═══ Self-Evolving Agent ═══
+
+@app.get("/api/evolve/code")
+async def api_evolve_code():
+    """Analyze Auto Makah codebase for issues and improvements."""
+    from core.evolver import analyze_code
+    result = await analyze_code()
+    return JSONResponse(result)
+
+@app.get("/api/evolve/workspace")
+async def api_evolve_workspace():
+    """Analyze workspace config files for redundancy and stale data."""
+    from core.evolver import analyze_config_files
+    base = os.path.dirname(os.path.dirname(__file__))
+    workspace = os.path.dirname(base)
+    result = await analyze_config_files(workspace)
+    return JSONResponse(result)
