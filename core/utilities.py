@@ -1,7 +1,7 @@
 """
 Utility Agents — don't need AI, always work
 """
-import math, json, base64, io, qrcode
+import math, json, base64, io
 
 # ═══ Islamic Calculator ═══
 
@@ -108,6 +108,10 @@ def unit_convert(value: float, conversion: str) -> dict:
 
 def generate_qr(data: str, size: int = 10) -> dict:
     """Generate QR code as base64 data URL."""
+    try:
+        import qrcode
+    except ImportError:
+        return {"error": "qrcode library not installed", "data": data}
     qr = qrcode.QRCode(version=1, box_size=size, border=2)
     qr.add_data(data)
     qr.make(fit=True)
