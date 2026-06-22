@@ -595,3 +595,15 @@ async def api_evolve_workspace():
         workspace = base
     result = await analyze_config_files(workspace)
     return JSONResponse(result)
+
+# ═══ Legal Agent ═══
+
+@app.post("/api/legal")
+async def api_legal(req: dict):
+    """Saudi legal analysis. Body: {question, domain: labor/companies/commercial/zakat/realestate}"""
+    from core.legal import full_pipeline
+    result = await full_pipeline(
+        question=req.get("question", ""),
+        domain=req.get("domain", "labor"),
+    )
+    return JSONResponse(result)
