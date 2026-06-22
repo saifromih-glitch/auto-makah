@@ -799,3 +799,40 @@ async def api_medical_terms(req: dict):
     from core.medical import medical_terms_explain
     result = await medical_terms_explain(terms=req.get("terms", ""))
     return JSONResponse(result)
+
+# ═══ More Agents ═══
+
+@app.get("/api/agents")
+async def api_agents_hall():
+    from core.more_agents import hall_of_agents
+    return JSONResponse(hall_of_agents())
+
+@app.post("/api/translate")
+async def api_translate(req: dict):
+    from core.more_agents import translate
+    result = await translate(text=req.get("text", ""), from_lang=req.get("from", "ar"), to_lang=req.get("to", "en"))
+    return JSONResponse(result)
+
+@app.post("/api/localize")
+async def api_localize(req: dict):
+    from core.more_agents import localize
+    result = await localize(text=req.get("text", ""), target_region=req.get("region", "السعودية"))
+    return JSONResponse(result)
+
+@app.post("/api/email")
+async def api_email(req: dict):
+    from core.more_agents import compose_email
+    result = await compose_email(purpose=req.get("purpose", ""), tone=req.get("tone", "رسمي"), recipient=req.get("recipient", ""))
+    return JSONResponse(result)
+
+@app.post("/api/social")
+async def api_social(req: dict):
+    from core.more_agents import social_post
+    result = await social_post(topic=req.get("topic", ""), platform=req.get("platform", "twitter"), tone=req.get("tone", "احترافي"))
+    return JSONResponse(result)
+
+@app.post("/api/content-calendar")
+async def api_calendar(req: dict):
+    from core.more_agents import content_calendar
+    result = await content_calendar(business=req.get("business", ""), days=req.get("days", 7))
+    return JSONResponse(result)
