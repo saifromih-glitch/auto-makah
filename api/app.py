@@ -877,3 +877,35 @@ async def api_pitch_deck(req: dict):
     from core.advanced import pitch_deck
     result = await pitch_deck(company=req.get("company", ""), audience=req.get("audience", "مستثمرين"))
     return JSONResponse(result)
+
+# ═══ Web Search + Export ═══
+
+@app.post("/api/search")
+async def api_web_search(req: dict):
+    from core.search_export import web_search
+    result = await web_search(query=req.get("query", ""), max_results=req.get("max", 5))
+    return JSONResponse(result)
+
+@app.get("/api/wiki/{topic}")
+async def api_wiki(topic: str):
+    from core.search_export import wikipedia_summary
+    result = await wikipedia_summary(topic=topic, lang="ar")
+    return JSONResponse(result)
+
+@app.post("/api/export/markdown")
+async def api_export_md(req: dict):
+    from core.search_export import export_to_markdown
+    md = export_to_markdown(title=req.get("title", ""), content=req.get("content", ""))
+    return Response(md, media_type="text/markdown; charset=utf-8")
+
+@app.post("/api/export/html")
+async def api_export_html(req: dict):
+    from core.search_export import export_to_html
+    html = export_to_html(title=req.get("title", ""), content=req.get("content", ""))
+    return HTMLResponse(html)
+
+@app.post("/api/text-stats")
+async def api_text_stats(req: dict):
+    from core.search_export import text_stats
+    result = text_stats(text=req.get("text", ""))
+    return JSONResponse(result)
