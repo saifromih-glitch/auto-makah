@@ -785,3 +785,17 @@ async def api_cv(req: dict):
     from core.hr import cv_analyzer
     result = await cv_analyzer(cv_text=req.get("cv", ""))
     return JSONResponse(result)
+
+# ═══ Medical Agent ═══
+
+@app.post("/api/medical/surgery-guide")
+async def api_surgery_guide(req: dict):
+    from core.medical import post_surgery_guide
+    result = await post_surgery_guide(surgery_type=req.get("surgery", ""))
+    return JSONResponse(result)
+
+@app.post("/api/medical/terms")
+async def api_medical_terms(req: dict):
+    from core.medical import medical_terms_explain
+    result = await medical_terms_explain(terms=req.get("terms", ""))
+    return JSONResponse(result)
