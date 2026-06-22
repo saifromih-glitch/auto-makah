@@ -717,3 +717,45 @@ async def api_campaign(req: dict):
     from core.marketing import campaign_idea
     result = await campaign_idea(product=req.get("product", ""), channel=req.get("channel", "منصات التواصل"))
     return JSONResponse(result)
+
+# ═══ Utility Agents (No AI — Always Available) ═══
+
+@app.post("/api/zakat")
+async def api_zakat(req: dict):
+    from core.utilities import zakat_calculator
+    result = zakat_calculator(
+        wealth=req.get("wealth", 0),
+        gold_price_per_gram=req.get("gold_price", 300),
+        debts=req.get("debts", 0),
+    )
+    return JSONResponse(result)
+
+@app.post("/api/inheritance")
+async def api_inheritance(req: dict):
+    from core.utilities import inheritance_calculator
+    result = inheritance_calculator(total=req.get("total", 0), heirs=req.get("heirs", []))
+    return JSONResponse(result)
+
+@app.post("/api/currency")
+async def api_currency(req: dict):
+    from core.utilities import currency_convert
+    result = currency_convert(amount=req.get("amount", 0), from_cur=req.get("from", "SAR"), to_cur=req.get("to", "USD"))
+    return JSONResponse(result)
+
+@app.post("/api/units")
+async def api_units(req: dict):
+    from core.utilities import unit_convert
+    result = unit_convert(value=req.get("value", 0), conversion=req.get("conversion", "km_to_miles"))
+    return JSONResponse(result)
+
+@app.post("/api/qr")
+async def api_qr(req: dict):
+    from core.utilities import generate_qr
+    result = generate_qr(data=req.get("data", ""), size=req.get("size", 10))
+    return JSONResponse(result)
+
+@app.post("/api/password")
+async def api_password(req: dict):
+    from core.utilities import generate_password
+    result = generate_password(length=req.get("length", 16), include_symbols=req.get("symbols", True))
+    return JSONResponse(result)
